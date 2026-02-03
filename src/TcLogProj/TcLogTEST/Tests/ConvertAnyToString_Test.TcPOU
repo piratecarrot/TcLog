@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1">
-  <POU Name="ConvertAnyToString_TEST" Id="{8723bf95-47c2-4342-9746-8c558da116aa}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK ConvertAnyToString_TEST EXTENDS TcUnit.FB_TestSuite
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.17">
+  <POU Name="ConvertAnyToString_Test" Id="{bffec7cc-dfd1-44f1-b53c-cdf94e5e7e5c}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK ConvertAnyToString_Test EXTENDS TcUnit.FB_TestSuite
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[ConvertAnyByteToString();
@@ -25,7 +25,7 @@ ConvertAnyUSINTToString();
 ConvertAnyWordToString();
 ConvertAnyWStringToString();]]></ST>
     </Implementation>
-    <Method Name="ConvertAnyByteToString" Id="{6a4de533-1ff4-4300-bd1b-aa9dee141478}">
+    <Method Name="ConvertAnyByteToString" Id="{30af38fe-d3a2-4249-8fe7-7606c2da7b0b}">
       <Declaration><![CDATA[METHOD ConvertAnyByteToString : BOOL
 VAR
   inputs : ARRAY[1..4] OF BYTE := [0, 1, 128, 255];
@@ -47,7 +47,7 @@ END_FOR
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ConvertAnyDateAndTimeToString" Id="{9ec8d9a4-8741-4865-a722-ba411337f891}">
+    <Method Name="ConvertAnyDateAndTimeToString" Id="{026e378e-6be4-441d-9f18-f0d6a3fc883a}">
       <Declaration><![CDATA[METHOD ConvertAnyDateAndTimeToString : BOOL
 VAR
   input : DATE_AND_TIME := DT#1970-01-01-00:00;
@@ -67,7 +67,7 @@ AssertEquals(Expected := expected,
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ConvertAnyDateToString" Id="{01dc3069-8329-4d56-baac-d69a1aaef399}">
+    <Method Name="ConvertAnyDateToString" Id="{7791548b-db86-404a-b01a-9e8126633dba}">
       <Declaration><![CDATA[METHOD ConvertAnyDateToString : BOOL
 VAR
   input : DATE := D#1970-01-01;
@@ -87,7 +87,7 @@ AssertEquals(Expected := expected,
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ConvertAnyDINTToString" Id="{9bf59e16-f1e6-45ac-a807-e1d1de1d7a2c}">
+    <Method Name="ConvertAnyDINTToString" Id="{50512445-8f21-4dd7-af88-64b132938ec2}">
       <Declaration><![CDATA[METHOD ConvertAnyDINTToString : BOOL
 VAR
   inputs : ARRAY[1..7] OF DINT := [-2147483648, -1073741824, -1, 0, 1, 1073741824, 2147483647];
@@ -109,7 +109,7 @@ END_FOR
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ConvertAnyDTToString" Id="{6f1e9768-4e40-4c59-bb14-df57394138b5}">
+    <Method Name="ConvertAnyDTToString" Id="{1abdc983-a8b7-45c6-bf6e-730292c4def4}">
       <Declaration><![CDATA[METHOD ConvertAnyDTToString : BOOL
 VAR
   input : DT := DT#1970-01-01-00:00;
@@ -129,7 +129,7 @@ AssertEquals(Expected := expected,
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ConvertAnyDWordToString" Id="{4f8362c2-1bc1-4575-a937-4e7d8af79721}">
+    <Method Name="ConvertAnyDWordToString" Id="{68fad783-1bdc-4109-b743-2a713de13063}">
       <Declaration><![CDATA[METHOD ConvertAnyDWordToString : BOOL
 VAR
   inputs : ARRAY[1..4] OF DWORD := [0, 1, 2147483647, 4294967295];
@@ -151,7 +151,7 @@ END_FOR
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ConvertAnyINTToString" Id="{03af596d-48bd-41ed-bda7-49b17c1fbeb2}">
+    <Method Name="ConvertAnyINTToString" Id="{092c80b6-d11b-4dbe-b818-68332df2f386}">
       <Declaration><![CDATA[METHOD ConvertAnyINTToString : BOOL
 VAR
   inputs : ARRAY[1..7] OF INT := [-32768, -18000, -1, 0, 1, 18000, 32767];
@@ -173,7 +173,7 @@ END_FOR
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ConvertAnyLINTToString" Id="{8e7df9bc-31be-419d-beb5-aa1f224ebdc7}">
+    <Method Name="ConvertAnyLINTToString" Id="{3184e632-0fe1-45c5-baec-c66e033a13dd}">
       <Declaration><![CDATA[METHOD ConvertAnyLINTToString : BOOL
 VAR
   inputs : ARRAY[1..7] OF LINT := [-2147483648, -18000, -1, 0, 1, 18000, 2147483648];
@@ -195,7 +195,7 @@ END_FOR
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ConvertAnyLRealToString" Id="{42351668-e462-4446-aac6-670516acb622}">
+    <Method Name="ConvertAnyLRealToString" Id="{48342050-7d7e-4bf9-bb6a-63114548b3f2}">
       <Declaration><![CDATA[METHOD ConvertAnyLRealToString : BOOL
 VAR
   inputs : ARRAY[1..5] OF LREAL := [-1.7976931348623157E+308, -4.94065645841247E-324, 0, 4.94065645841247E-324, 1.7976931348623157E+308];
@@ -217,7 +217,7 @@ END_FOR
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ConvertAnyLWordToString" Id="{db8455a2-4fe9-44ea-81da-61701a6999c0}">
+    <Method Name="ConvertAnyLWordToString" Id="{cec0ea8a-9459-48c5-a710-7e0a42b21b64}">
       <Declaration><![CDATA[METHOD ConvertAnyLWordToString : BOOL
 VAR
   inputs : ARRAY[1..4] OF LWORD := [0, 1, 2147483647, 4294967295];
@@ -239,7 +239,7 @@ END_FOR
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ConvertAnyRealToString" Id="{7dde6cfd-c6ff-45c1-80bc-3da59350d708}">
+    <Method Name="ConvertAnyRealToString" Id="{6f183cbf-e28c-44e5-a2db-d234faede81c}">
       <Declaration><![CDATA[METHOD ConvertAnyRealToString : BOOL
 VAR
   inputs : ARRAY[1..5] OF REAL := [-3.402823E+38, -1.0, 0, 1.0, 3.402823E+38];
@@ -261,7 +261,7 @@ END_FOR
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ConvertAnySINTToString" Id="{0e12c253-d6dc-43ca-ad90-0a44d459c5a8}">
+    <Method Name="ConvertAnySINTToString" Id="{81c8711c-1aa3-4bae-9d76-feddf8f00cb5}">
       <Declaration><![CDATA[METHOD ConvertAnySINTToString : BOOL
 VAR
   inputs : ARRAY[1..5] OF SINT := [-128, -1, 0, 1, 127];
@@ -283,7 +283,7 @@ END_FOR
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ConvertAnyStringToString" Id="{878de958-8cc9-40c7-86f0-88d52c3b1291}">
+    <Method Name="ConvertAnyStringToString" Id="{aec75827-4c6c-4e03-b413-a62908409165}">
       <Declaration><![CDATA[METHOD ConvertAnyStringToString : BOOL
 VAR
   input : STRING := 'Hallo';
@@ -303,7 +303,7 @@ AssertEquals(Expected := expected,
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ConvertAnyTimeToString" Id="{a7ef71a7-444f-4dc1-955b-c0574355c4c6}">
+    <Method Name="ConvertAnyTimeToString" Id="{bce72a39-d074-4d7d-87d5-9ea1b5442561}">
       <Declaration><![CDATA[METHOD ConvertAnyTimeToString : BOOL
 VAR
   input : TIME := T#49D17H2M47S295MS;
@@ -323,7 +323,7 @@ AssertEquals(Expected := expected,
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ConvertAnyTODToString" Id="{e06cf1c5-87e8-426a-9089-bc21534675bb}">
+    <Method Name="ConvertAnyTODToString" Id="{f0e61411-fbb6-4cc9-b3bc-33168d88e464}">
       <Declaration><![CDATA[METHOD ConvertAnyTODToString : BOOL
 VAR
   input : TOD := TOD#11:02:47.295;
@@ -343,7 +343,7 @@ AssertEquals(Expected := expected,
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ConvertAnyUDINTToString" Id="{3229ca76-3df9-44f7-aacd-19b8138d5651}">
+    <Method Name="ConvertAnyUDINTToString" Id="{deb07dfe-dad5-47cd-8d58-f5179ceb7703}">
       <Declaration><![CDATA[METHOD ConvertAnyUDINTToString : BOOL
 VAR
   inputs : ARRAY[1..3] OF UDINT := [0, 1, 4294967295];
@@ -365,7 +365,7 @@ END_FOR
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ConvertAnyUINTToString" Id="{ba193657-134b-49fe-8445-16bf4f0f5139}">
+    <Method Name="ConvertAnyUINTToString" Id="{14a149d7-1263-485f-b752-4d0d62289060}">
       <Declaration><![CDATA[METHOD ConvertAnyUINTToString : BOOL
 VAR
   inputs : ARRAY[1..3] OF UINT := [0, 1, 65535];
@@ -387,7 +387,7 @@ END_FOR
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ConvertAnyULINTToString" Id="{2eef74a8-d2ce-40e5-ada9-a977392f50d2}">
+    <Method Name="ConvertAnyULINTToString" Id="{2d6f3d57-2d45-4108-8a8c-2893655b42ab}">
       <Declaration><![CDATA[METHOD ConvertAnyULINTToString : BOOL
 VAR
   inputs : ARRAY[1..3] OF ULINT := [0, 1, 4294967295];
@@ -409,7 +409,7 @@ END_FOR
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ConvertAnyUSINTToString" Id="{54e44617-410b-411f-9440-d611d1294e71}">
+    <Method Name="ConvertAnyUSINTToString" Id="{4a770bec-fc4f-4562-aa90-7edf81904d98}">
       <Declaration><![CDATA[METHOD ConvertAnyUSINTToString : BOOL
 VAR
   inputs : ARRAY[1..3] OF USINT := [0, 1, 255];
@@ -431,7 +431,7 @@ END_FOR
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ConvertAnyWordToString" Id="{58d7c7a1-012a-4615-9b88-6f8dbc3301fc}">
+    <Method Name="ConvertAnyWordToString" Id="{4d4a5e6a-6e99-4c5c-8b35-6a5183266769}">
       <Declaration><![CDATA[METHOD ConvertAnyWordToString : BOOL
 VAR
   inputs : ARRAY[1..3] OF WORD := [0, 1, 65535];
@@ -453,7 +453,7 @@ END_FOR
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ConvertAnyWStringToString" Id="{4a04c330-3f68-4390-83b8-8e7e709d4d25}">
+    <Method Name="ConvertAnyWStringToString" Id="{f2c8c7d0-8e33-4214-b065-2cf0c8991333}">
       <Declaration><![CDATA[METHOD ConvertAnyWStringToString : BOOL
 VAR
   input : WSTRING := "Hallo";
@@ -473,7 +473,7 @@ AssertEquals(Expected := expected,
 TEST_FINISHED();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="FormatResult" Id="{dfc117b2-1e90-4366-99ce-6966d5be1d1d}">
+    <Method Name="FormatResult" Id="{75893dba-e259-47a5-b935-816da1fe0915}">
       <Declaration><![CDATA[METHOD PRIVATE FormatResult : STRING
 VAR_INPUT
   Expected : STRING;

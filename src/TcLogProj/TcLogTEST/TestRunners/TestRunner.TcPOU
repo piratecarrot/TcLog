@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.17">
+  <POU Name="TestRunner" Id="{379526ca-9719-4af5-b69e-537f4c5508c9}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM TestRunner
+VAR
+  test_wrapper : TestWrapper;
+  date_time_time : DateTime_Test;
+  helper_functions_test : ConvertAnyToString_Test;
+  dynamic_string_buffer_test : DynamicStringBuffer_Test;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[TestWrapper();
+
+TcUnit.Run();]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

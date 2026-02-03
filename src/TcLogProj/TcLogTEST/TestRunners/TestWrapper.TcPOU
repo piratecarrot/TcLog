@@ -1,23 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1">
-  <POU Name="TestWrapper_NET" Id="{32780ead-f361-4f91-ae5e-047717d14d80}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK TestWrapper_NET
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.17">
+  <POU Name="TestWrapper" Id="{2083d311-1ce0-4edb-9acc-97906d1cd251}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK TestWrapper
 VAR
-  _coreLogger : TcLogCore(BufferSize:=50 * 50 * (Tc2_System.MAX_STRING_LENGTH + Constants.FifoOverhead));
-  _coreLoggerFirstCycle : TcLogCore(BufferSize:=50 * 50 * (Tc2_System.MAX_STRING_LENGTH + Constants.FifoOverhead));
-  _coreLoggerFirstCycleValidTimestampOnly : TcLogCore(BufferSize:=50 * 50 * (Tc2_System.MAX_STRING_LENGTH + Constants.FifoOverhead));
-  _loggerFirstCycle : TcLog;
-  _loggerFirstCycleValidTimestampOnly : TcLog;
-  _logger : TcLog;
-  _flushCache : BOOL;
+  core_logger : TcLogCore(BufferSize:=50 * 50 * (Tc2_System.MAX_STRING_LENGTH + Constants.FifoOverhead));
+  core_logger_first_cycle : TcLogCore(BufferSize:=50 * 50 * (Tc2_System.MAX_STRING_LENGTH + Constants.FifoOverhead));
+  core_logger_first_cycle_valid_timestamp_only : TcLogCore(BufferSize:=50 * 50 * (Tc2_System.MAX_STRING_LENGTH + Constants.FifoOverhead));
+  logger_first_cycle : TcLog;
+  logger_first_cycle_valid_timestamp_only : TcLog;
+  logger : TcLog;
+  flush_cache : BOOL;
  
   // Test drivers
-  _getDateTime : DateTime;
-  _setLocalSystemTime : NT_SetLocalTime;
-  _cycles : INT;
+  get_date_time : DateTime;
+  set_local_system_time : NT_SetLocalTime;
+  cycles : INT;
   _i : INT;
-  _persistenceTimeStaysWithinBounds : F_TRIG;
-  _isFirstCycle: BOOL := TRUE;
+  persistence_time_stays_within_bounds : F_Trig;
+  is_first_cycle: BOOL := TRUE;
   
   // Exchanged variables with .NET tests
   FilePath : STRING;
@@ -63,14 +63,12 @@ VAR
   
   Persistance_time_stays_within_bounds : BOOL;
   Duration_in_cylces : DINT := 1;
-  
-END_VAR
-]]></Declaration>
+END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[// ****** U N I T   T E S T S ******
 
 // Set up TcLog
-_coreLogger
+core_logger
   .IncludeInstancePath()
   .MinimumLevel(LogLevels.Warning)
   .SetDelimiter(Delimiter)
@@ -82,13 +80,13 @@ _coreLogger
   .RunLogger();
 //_logger.SetLogger(_coreLogger);
 
-IF _flushCache THEN _coreLogger.FlushCache(); END_IF
+IF flush_cache THEN core_logger.FlushCache(); END_IF
   
 // Test drivers
-_getDateTime();
-LocalTimeAsString := _getDateTime.AsLocalSystemTimeString;
+get_date_time();
+LocalTimeAsString := get_date_time.AsLocalSystemTimeString;
 
-_setLocalSystemTime(
+set_local_system_time(
   NETID   := '',
   TIMESTR := STRING_TO_SYSTEMTIME(NewLocalSystemTimeToBeSet),
   START   := TriggerNewLocalSystemTime,
@@ -98,80 +96,80 @@ _setLocalSystemTime(
 // Execute tests
 IF Persist_simple_error_message_run THEN
   Persist_simple_error_message_run := FALSE;
-  _logger
+  logger
     .Error(Persist_simple_error_message_data);
 END_IF
 
 IF Persist_long_error_message_run THEN
   Persist_long_error_message_run := FALSE;
-  _logger
+  logger
     .ToCustomFormat(Persist_long_error_message_data);
 END_IF
 
 IF Linebreak_is_included_when_log_message_has_maximum_length_run THEN
   Linebreak_is_included_when_log_message_has_maximum_length_run := FALSE;
-  _logger
+  logger
     .ToCustomFormat(Linebreak_is_included_when_log_message_has_maximum_length_data);
-  _logger
+  logger
     .ToCustomFormat(Linebreak_is_included_when_log_message_has_maximum_length_data);
 END_IF
 
 
 IF Do_not_persist_logs_below_log_level_run THEN
   Do_not_persist_logs_below_log_level_run := FALSE;
-  _logger
+  logger
     .Information('Nothing');
 END_IF
 
 IF Log_message_contains_instance_path_run THEN
   Log_message_contains_instance_path_run := FALSE;
-  _logger
+  logger
     .Error('Nothing');
 END_IF
 
 IF Log_message_uses_correct_delimiter_run THEN
   Log_message_uses_correct_delimiter_run := FALSE;
-  _logger
+  logger
     .Error(Log_message_uses_correct_delimiter_data);
 END_IF
 
 IF Log_message_contains_custom_formatted_timestamp_run THEN
   Log_message_contains_custom_formatted_timestamp_run := FALSE;
-  _logger
+  logger
     .Error('Test message');
 END_IF
 
 IF Delete_logs_if_expired_run THEN
   Delete_logs_if_expired_run := FALSE;
-  _logger
+  logger
     .Error('Test message');
 END_IF
 
 IF New_logfile_is_created_if_rolling_interval_rolls_run THEN
   New_logfile_is_created_if_rolling_interval_rolls_run := FALSE;
-  _logger
+  logger
     .Error('Test message');
 END_IF
 
 IF Same_log_file_is_used_until_rolling_interval_rolls THEN
   Same_log_file_is_used_until_rolling_interval_rolls := FALSE;
-  _logger
+  logger
     .Error('Test message');
 END_IF
 
 IF Log_in_consecutive_cycles THEN
-  _logger
-    .Error(Tc2_Standard.CONCAT('Logging cycle ', INT_TO_STRING(_cycles)));
-  _cycles := _cycles + 1;
-  IF _cycles >= Number_of_log_cycles THEN
-    _cycles := 0;
+  logger
+    .Error(Tc2_Standard.CONCAT('Logging cycle ', INT_TO_STRING(cycles)));
+  cycles := cycles + 1;
+  IF cycles >= Number_of_log_cycles THEN
+    cycles := 0;
     Log_in_consecutive_cycles := FALSE;
   END_IF
 END_IF
 
 IF Log_multiple_logs_in_one_cycle THEN
   FOR _i:= 1 TO DINT_TO_INT(Number_of_logs_per_cycle) DO
-    _logger.
+    logger.
       Error(Tc2_Standard.CONCAT('Logging multiple times per cycle. Current step: ', INT_TO_STRING(_i))); 
   END_FOR
   Log_multiple_logs_in_one_cycle := FALSE;
@@ -180,7 +178,7 @@ END_IF
 IF Log_multiple_logs_in_multiple_cycles THEN
   IF CycleCount <= Number_of_cycles THEN  
     FOR _i:= 1 TO DINT_TO_INT(Number_of_logs_per_cycle) DO
-      _logger
+      logger
         .AppendString('Logging multiple times per cycle. Cycle: ')
         .AppendString(DINT_TO_STRING(CycleCount))
         .AppendString(' / Step: ')
@@ -194,8 +192,8 @@ IF Log_multiple_logs_in_multiple_cycles THEN
   END_IF
 END_IF 
 
-_persistenceTimeStaysWithinBounds(CLK := (Persistance_time_stays_within_bounds AND _coreLogger.Busy));
-IF _persistenceTimeStaysWithinBounds.Q THEN
+persistence_time_stays_within_bounds(CLK := (Persistance_time_stays_within_bounds AND core_logger.Busy));
+IF persistence_time_stays_within_bounds.Q THEN
   CycleCount := 1;
   Persistance_time_stays_within_bounds := FALSE;
 END_IF
@@ -203,7 +201,7 @@ IF Persistance_time_stays_within_bounds THEN
   Duration_in_cylces := Duration_in_cylces + 1;
   IF CycleCount <= Number_of_cycles THEN  
     FOR _i:= 1 TO DINT_TO_INT(Number_of_logs_per_cycle) DO
-      _logger
+      logger
         .AppendString('Logging multiple times per cycle. Cycle: ')
         .AppendString(DINT_TO_STRING(CycleCount))
         .AppendString(' / Step: ')
@@ -215,7 +213,7 @@ IF Persistance_time_stays_within_bounds THEN
 END_IF
 
 // Check first cpu cycle
-_coreLoggerFirstCycle
+core_logger_first_cycle
   .IncludeInstancePath()
   .MinimumLevel(LogLevels.Warning)
   .SetDelimiter(Delimiter)
@@ -225,9 +223,9 @@ _coreLoggerFirstCycle
   .WriteToAds()
   .WriteToFile('C:\UnitTestFirstCycle\', 'firstCycle.txt')
   .RunLogger();
-_loggerFirstCycle.SetLogger(_coreLoggerFirstCycle);
+logger_first_cycle.SetLogger(core_logger_first_cycle);
 
-_coreLoggerFirstCycleValidTimestampOnly
+core_logger_first_cycle_valid_timestamp_only
   .IncludeInstancePath()
   .MinimumLevel(LogLevels.Warning)
   .SetDelimiter(Delimiter)
@@ -238,15 +236,13 @@ _coreLoggerFirstCycleValidTimestampOnly
   .WriteToFile('C:\UnitTestFirstCycle\', 'firstCycleValidTimestampOnly.txt')
   .ValidTimestampsOnly()
   .RunLogger();
-_loggerFirstCycleValidTimestampOnly.SetLogger(_coreLoggerFirstCycleValidTimestampOnly);
+logger_first_cycle_valid_timestamp_only.SetLogger(core_logger_first_cycle_valid_timestamp_only);
 
-IF _isFirstCycle THEN
-  _loggerFirstCycle.Error('Log in first cycle');
-  _loggerFirstCycleValidTimestampOnly.Error('Log in first cycle');
-  _isFirstCycle := FALSE;
+IF is_first_cycle THEN
+  logger_first_cycle.Error('Log in first cycle');
+  logger_first_cycle_valid_timestamp_only.Error('Log in first cycle');
+  is_first_cycle := FALSE;
 END_IF
-
-
 ]]></ST>
     </Implementation>
   </POU>

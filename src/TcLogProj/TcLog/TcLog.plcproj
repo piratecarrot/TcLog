@@ -8,7 +8,7 @@
     <WriteProductVersion>false</WriteProductVersion>
     <GenerateTpy>false</GenerateTpy>
     <Name>TcLog</Name>
-    <ProgramVersion>3.1.4026.12</ProgramVersion>
+    <ProgramVersion>3.1.4026.20</ProgramVersion>
     <Application>{b17b6069-df5e-455f-9777-ca2592ee6113}</Application>
     <TypeSystem>{827c7b48-6b19-4663-8b59-fefb0b436024}</TypeSystem>
     <Implicit_Task_Info>{39cb5e76-4fe2-46f6-ae40-1fcb2a6531eb}</Implicit_Task_Info>
@@ -33,19 +33,17 @@
     <SelectedLibraryCategories>
       <Id>{a008f0f9-813d-4727-ad9c-d60bc9412b1d}</Id>
     </SelectedLibraryCategories>
-    <AllowChecksForLibrary>false</AllowChecksForLibrary>
     <POUsForPropertyAccessIncluded>false</POUsForPropertyAccessIncluded>
     <GlobalVersionStructureIncluded>false</GlobalVersionStructureIncluded>
+    <VirtualLibrary>true</VirtualLibrary>
   </PropertyGroup>
   <ItemGroup>
-    <Folder Include="Logger\_Tests" />
     <Folder Include="StringBuilder\_Interfaces" />
     <Folder Include="Utils" />
-    <Folder Include="Utils\_Tests" />
-    <Folder Include="Utils\_DataTypes" />
+    <Folder Include="Utils\DataTypes" />
     <Folder Include="Logger" />
-    <Folder Include="Logger\_DataTypes" />
-    <Folder Include="Logger\_Interfaces" />
+    <Folder Include="Logger\DataTypes" />
+    <Folder Include="Logger\Interfaces" />
     <Folder Include="StringBuilder" />
   </ItemGroup>
   <ItemGroup>
@@ -63,9 +61,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Logger\TcLogTrig.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Logger\_Tests\TestWrapper_NET.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="StringBuilder\_Interfaces\ILimitedStringBuilder.TcIO">
@@ -89,50 +84,36 @@
     <Compile Include="Utils\GetFileAgeInSeconds.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Utils\_DataTypes\DeleteFilesState.TcDUT">
+    <Compile Include="Utils\DataTypes\DeleteFilesState.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Utils\_DataTypes\PersistToFileState.TcDUT">
+    <Compile Include="Utils\DataTypes\PersistToFileState.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Logger\_DataTypes\ErrorCodes.TcDUT">
+    <Compile Include="Logger\DataTypes\ErrorCodes.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Logger\_DataTypes\LogLevels.TcDUT">
+    <Compile Include="Logger\DataTypes\LogLevels.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Logger\_DataTypes\RollingIntervals.TcDUT">
+    <Compile Include="Logger\DataTypes\RollingIntervals.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Logger\_DataTypes\Error.TcDUT">
+    <Compile Include="Logger\DataTypes\Error.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Logger\_DataTypes\LoggingConfiguration.TcDUT">
+    <Compile Include="Logger\DataTypes\LoggingConfiguration.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Logger\_Interfaces\ILog.TcIO">
+    <Compile Include="Logger\Interfaces\ILog.TcIO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Logger\_Interfaces\ILogCore.TcIO">
+    <Compile Include="Logger\Interfaces\ILogCore.TcIO">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="StringBuilder\StringBuilder.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Utils\_Tests\ConvertAnyToString_TEST.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Utils\_Tests\DateTime_TEST.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Utils\_Tests\DynamicStringBuffer_TEST.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <LibraryReference Include="Base Interfaces,newest,System">
-      <Namespace>IBaseLibrary</Namespace>
-    </LibraryReference>
   </ItemGroup>
   <ItemGroup>
     <PlaceholderReference Include="Tc2_Standard">
@@ -168,8 +149,8 @@
   <ProjectExtensions>
     <PlcProjectOptions>
       <XmlArchive>
-        <Data>
-          <o xml:space="preserve" t="OptionKey">
+  <Data>
+    <o xml:space="preserve" t="OptionKey">
       <v n="Name">"&lt;ProjectRoot&gt;"</v>
       <d n="SubKeys" t="Hashtable" ckt="String" cvt="OptionKey">
         <v>{192FAD59-8248-4824-A8DE-9177C94C195A}</v>
@@ -191,6 +172,12 @@
         <o>
           <v n="Name">"{29BD8D0C-3586-4548-BB48-497B9A01693F}"</v>
           <d n="SubKeys" t="Hashtable" ckt="String" cvt="OptionKey">
+            <v>NamingConventions</v>
+            <o>
+              <v n="Name">"NamingConventions"</v>
+              <d n="SubKeys" t="Hashtable" />
+              <d n="Values" t="Hashtable" />
+            </o>
             <v>Rules</v>
             <o>
               <v n="Name">"Rules"</v>
@@ -227,6 +214,12 @@
             <v>5410</v>
           </d>
         </o>
+        <v>{eeeeeeee-3909-4298-8022-501ac3238667}</v>
+        <o>
+          <v n="Name">"{eeeeeeee-3909-4298-8022-501ac3238667}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" />
+        </o>
         <v>{F66C7017-BDD8-4114-926C-81D6D687E35F}</v>
         <o>
           <v n="Name">"{F66C7017-BDD8-4114-926C-81D6D687E35F}"</v>
@@ -236,14 +229,14 @@
       </d>
       <d n="Values" t="Hashtable" />
     </o>
-        </Data>
-        <TypeList>
-          <Type n="Boolean">System.Boolean</Type>
-          <Type n="Hashtable">System.Collections.Hashtable</Type>
-          <Type n="OptionKey">{54dd0eac-a6d8-46f2-8c27-2f43c7e49861}</Type>
-          <Type n="String">System.String</Type>
-        </TypeList>
-      </XmlArchive>
+  </Data>
+  <TypeList>
+    <Type n="Boolean">System.Boolean</Type>
+    <Type n="Hashtable">System.Collections.Hashtable</Type>
+    <Type n="OptionKey">{54dd0eac-a6d8-46f2-8c27-2f43c7e49861}</Type>
+    <Type n="String">System.String</Type>
+  </TypeList>
+</XmlArchive>
     </PlcProjectOptions>
   </ProjectExtensions>
 </Project>

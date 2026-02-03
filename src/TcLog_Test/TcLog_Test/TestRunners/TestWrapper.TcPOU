@@ -87,84 +87,84 @@ get_date_time();
 LocalTimeAsString := get_date_time.AsLocalSystemTimeString;
 
 set_local_system_time(
-  NETID   := '',
-  TIMESTR := STRING_TO_SYSTEMTIME(NewLocalSystemTimeToBeSet),
-  START   := TriggerNewLocalSystemTime,
-  TMOUT := T#2S
-  );
+	NetId   := '',
+	TimeStr := STRING_TO_SYSTEMTIME(NewLocalSystemTimeToBeSet),
+	Start   := TriggerNewLocalSystemTime,
+	TmOut := T#2S
+);
 
 // Execute tests
 IF Persist_simple_error_message_run THEN
-  Persist_simple_error_message_run := FALSE;
-  logger
-    .Error(Persist_simple_error_message_data);
+	Persist_simple_error_message_run := FALSE;
+	logger
+		.Error(Persist_simple_error_message_data);
 END_IF
 
 IF Persist_long_error_message_run THEN
-  Persist_long_error_message_run := FALSE;
-  logger
-    .ToCustomFormat(Persist_long_error_message_data);
+	Persist_long_error_message_run := FALSE;
+	logger
+		.ToCustomFormat(Persist_long_error_message_data);
 END_IF
 
 IF Linebreak_is_included_when_log_message_has_maximum_length_run THEN
-  Linebreak_is_included_when_log_message_has_maximum_length_run := FALSE;
-  logger
-    .ToCustomFormat(Linebreak_is_included_when_log_message_has_maximum_length_data);
-  logger
-    .ToCustomFormat(Linebreak_is_included_when_log_message_has_maximum_length_data);
+	Linebreak_is_included_when_log_message_has_maximum_length_run := FALSE;
+	logger
+		.ToCustomFormat(Linebreak_is_included_when_log_message_has_maximum_length_data);
+	logger
+		.ToCustomFormat(Linebreak_is_included_when_log_message_has_maximum_length_data);
 END_IF
 
 
 IF Do_not_persist_logs_below_log_level_run THEN
-  Do_not_persist_logs_below_log_level_run := FALSE;
-  logger
-    .Information('Nothing');
+	Do_not_persist_logs_below_log_level_run := FALSE;
+	logger
+		.Information('Nothing');
 END_IF
 
 IF Log_message_contains_instance_path_run THEN
-  Log_message_contains_instance_path_run := FALSE;
-  logger
-    .Error('Nothing');
+	Log_message_contains_instance_path_run := FALSE;
+	logger
+		.Error('Nothing');
 END_IF
 
 IF Log_message_uses_correct_delimiter_run THEN
-  Log_message_uses_correct_delimiter_run := FALSE;
-  logger
-    .Error(Log_message_uses_correct_delimiter_data);
+	Log_message_uses_correct_delimiter_run := FALSE;
+	logger
+		.Error(Log_message_uses_correct_delimiter_data);
 END_IF
 
 IF Log_message_contains_custom_formatted_timestamp_run THEN
-  Log_message_contains_custom_formatted_timestamp_run := FALSE;
-  logger
-    .Error('Test message');
+	Log_message_contains_custom_formatted_timestamp_run := FALSE;
+	logger
+		.Error('Test message');
 END_IF
 
 IF Delete_logs_if_expired_run THEN
-  Delete_logs_if_expired_run := FALSE;
-  logger
-    .Error('Test message');
+	Delete_logs_if_expired_run := FALSE;
+	logger
+		.Error('Test message');
 END_IF
 
 IF New_logfile_is_created_if_rolling_interval_rolls_run THEN
-  New_logfile_is_created_if_rolling_interval_rolls_run := FALSE;
-  logger
-    .Error('Test message');
+	New_logfile_is_created_if_rolling_interval_rolls_run := FALSE;
+	logger
+		.Error('Test message');
 END_IF
 
 IF Same_log_file_is_used_until_rolling_interval_rolls THEN
-  Same_log_file_is_used_until_rolling_interval_rolls := FALSE;
-  logger
-    .Error('Test message');
+	Same_log_file_is_used_until_rolling_interval_rolls := FALSE;
+	logger
+		.Error('Test message');
 END_IF
 
 IF Log_in_consecutive_cycles THEN
-  logger
-    .Error(Tc2_Standard.CONCAT('Logging cycle ', INT_TO_STRING(cycles)));
-  cycles := cycles + 1;
-  IF cycles >= Number_of_log_cycles THEN
-    cycles := 0;
-    Log_in_consecutive_cycles := FALSE;
-  END_IF
+	logger
+		.Error(Tc2_Standard.CONCAT('Logging cycle ', INT_TO_STRING(cycles)));
+	cycles := cycles + 1;
+	IF cycles >= Number_of_log_cycles THEN
+		cycles := 0;
+		Log_in_consecutive_cycles := FALSE;
+	END_IF
 END_IF
 
 IF Log_multiple_logs_in_one_cycle THEN
@@ -240,10 +240,9 @@ logger_first_cycle_valid_timestamp_only.SetLogger(core_logger_first_cycle_valid_
 
 IF is_first_cycle THEN
   logger_first_cycle.Error('Log in first cycle');
-  logger_first_cycle_valid_timestamp_only.Error('Log in first cycle');
+  logger_first_cycle_valid_timestamp_only.Error('Log in first cycle with valid timestamps only');
   is_first_cycle := FALSE;
-END_IF
-]]></ST>
+END_IF]]></ST>
     </Implementation>
   </POU>
 </TcPlcObject>

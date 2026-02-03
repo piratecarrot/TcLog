@@ -7,7 +7,7 @@
     <DownloadApplicationInfo>true</DownloadApplicationInfo>
     <WriteProductVersion>true</WriteProductVersion>
     <GenerateTpy>false</GenerateTpy>
-    <Name>TcLog_Testz</Name>
+    <Name>TcLog_Test</Name>
     <ProgramVersion>3.1.4026.20</ProgramVersion>
     <Application>{8146f613-9e7d-40c5-8b31-c45750c652a0}</Application>
     <TypeSystem>{fbd87f5e-6357-460c-8b4e-eca3de6b406a}</TypeSystem>
@@ -54,6 +54,10 @@
       <DefaultResolution>Tc3_Module, * (Beckhoff Automation GmbH)</DefaultResolution>
       <Namespace>Tc3_Module</Namespace>
     </PlaceholderReference>
+    <PlaceholderReference Include="TcLog">
+      <DefaultResolution>[TcLog], * (Benedikt Geisler)</DefaultResolution>
+      <Namespace>TcLogLib</Namespace>
+    </PlaceholderReference>
     <PlaceholderReference Include="TcUnit">
       <DefaultResolution>TcUnit, * (www.tcunit.org)</DefaultResolution>
       <Namespace>TcUnit</Namespace>
@@ -63,6 +67,11 @@
     <Folder Include="TestRunners" />
     <Folder Include="Tasks" />
     <Folder Include="Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TcLog_Test.tmc">
+      <SubType>Content</SubType>
+    </None>
   </ItemGroup>
   <ProjectExtensions>
     <PlcProjectOptions>

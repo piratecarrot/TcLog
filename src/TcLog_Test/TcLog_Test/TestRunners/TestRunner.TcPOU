@@ -9,7 +9,7 @@ VAR
   dynamic_string_buffer_test : DynamicStringBuffer_Test;
 END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[TestWrapper();
+      <ST><![CDATA[test_wrapper();
 
 TcUnit.Run();]]></ST>
     </Implementation>

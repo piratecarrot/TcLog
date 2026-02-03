@@ -2,6 +2,7 @@
 <TcPlcObject Version="1.1.0.1">
   <POU Name="DateTime" Id="{7bb601ce-0481-4b2f-8999-c7d1d405c65b}" SpecialFunc="None">
     <Declaration><![CDATA[/// Generate time data in different formats.
+{attribute 'no_explicit_call' := 'This FB is a CLASS and must be accessed using methods or properties'}
 {attribute: 'hide_all_locals'}
 FUNCTION_BLOCK DateTime
 VAR
@@ -13,29 +14,7 @@ VAR
   _utcTime : Tc2_Utilities.FB_TzSpecificLocalTimeToFileTime;
 END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[// Get local system time
-_localSystemTime(
-  sNetID  :=  '',
-  bEnable :=  TRUE,
-  dwCycle :=  1,
-  dwOpt :=  1,
-  tTimeout:=  DEFAULT_ADS_TIMEOUT
-);
-
-// Get timezone information
-_timeZoneInfo(
-  sNetID := '',
-  bExecute := TRUE,
-  tTimeout := DEFAULT_ADS_TIMEOUT);
-
-// Convert local time to utc time
-_utcTime(
-  in := THIS^.AsLocalFileTime,
-  tzInfo := _timeZoneInfo.tzInfo);
-  
-// Finished retrieving time data
-_localSystemTimeValid(CLK := _localSystemTime.bValid);
-]]></ST>
+      <ST><![CDATA[]]></ST>
     </Implementation>
     <Property Name="AsLocalFileTime" Id="{60c017b9-6f52-4ca8-88d9-1d8fb99baf00}">
       <Declaration><![CDATA[/// Returns local time as `Tc2_Utilities.T_FILETIME`.
@@ -85,14 +64,42 @@ PROPERTY AsUtcFileTime : Tc2_Utilities.T_FILETIME
         </Implementation>
       </Get>
     </Property>
+    <Method Name="CyclicCall" Id="{1d44cef7-7f9d-49e6-90d5-1051ba2ff8af}">
+      <Declaration><![CDATA[METHOD PUBLIC CyclicCall]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Get local system time
+_localSystemTime(
+	sNetID  :=  '',
+	bEnable :=  TRUE,
+	dwCycle :=  1,
+	dwOpt :=  1,
+	tTimeout:=  DEFAULT_ADS_TIMEOUT
+);
+
+// Get timezone information
+_timeZoneInfo(
+	sNetID := '',
+	bExecute := TRUE,
+	tTimeout := DEFAULT_ADS_TIMEOUT
+);
+
+// Convert local time to utc time
+_utcTime(
+	in := THIS^.AsLocalFileTime,
+	tzInfo := _timeZoneInfo.tzInfo
+);
+  
+// Finished retrieving time data
+_localSystemTimeValid(Clk := _localSystemTime.bValid);]]></ST>
+      </Implementation>
+    </Method>
     <Property Name="Done" Id="{f28610e6-0ae1-4751-8171-e95d5aa75a95}">
       <Declaration><![CDATA[/// When calling `DateTime` the first time, it takes some time until all time and timezone information is available.
 /// `Done` is `TRUE` for one cycle, once all the data is ready. 
 {attribute 'monitoring':='call'}
-PROPERTY Done : BOOL
-]]></Declaration>
+PROPERTY PUBLIC Done : BOOL]]></Declaration>
       <Get Name="Get" Id="{30748c4b-de4a-4ed8-9905-99a2fa026501}">
-        <Declaration><![CDATA[]]></Declaration>
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
         <Implementation>
           <ST><![CDATA[Done := _localSystemTimeValid.Q;]]></ST>
         </Implementation>
@@ -115,8 +122,7 @@ VAR_INST
 END_VAR
 VAR
   localSystemTime : Tc2_Utilities.TIMESTRUCT;
-END_VAR
-]]></Declaration>
+END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[localSystemTime := THIS^.AsLocalSystemTime;
 
@@ -159,7 +165,7 @@ ReplaceFormatPlaceholder := Tc2_Standard.REPLACE(format, replaceString, length, 
 /// _YYMMDD-hh:mm:ss:iii_   
 /// => _20210812-12:30:22:123_
 {attribute 'hide_all_locals'}
-METHOD ToFormatString : Tc2_System.T_MaxString
+METHOD PUBLIC ToFormatString : Tc2_System.T_MaxString
 VAR_INPUT
   /// Format the timestamp should have.
   format : STRING;
@@ -180,8 +186,7 @@ VAR
 END_VAR
 VAR CONSTANT
   ValidFormat : STRING := 'YMDhms';
-END_VAR
-]]></Declaration>
+END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// Parses "format" and returns a adequatly formatted string containing the time information
 inputString := format;

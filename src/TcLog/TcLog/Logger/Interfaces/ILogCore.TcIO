@@ -18,11 +18,11 @@ END_VAR]]></Declaration>
 // - log message
 // - instance path of logging source (optional)
 // The message will only be logged if the logging level exceeds the configured minimum logging level.
-METHOD LogStandardFormat : BOOL
+METHOD PUBLIC LogStandardFormat : BOOL
 VAR_INPUT
-    data : Tc2_System.T_MaxString; // Data to be logged. Additional formatting wil be done.
-    instancePath : Tc2_System.T_MaxString; // Instance path of calling logger to locate source of logging message.
-    logLevel : LogLevels; // Log level of message.
+	data : Tc2_System.T_MaxString; // Data to be logged. Additional formatting wil be done.
+	instance_path : Tc2_System.T_MaxString; // Instance path of calling logger to locate source of logging message.
+	level : LogLevel; // Log level of message.
 END_VAR]]></Declaration>
     </Method>
   </Itf>

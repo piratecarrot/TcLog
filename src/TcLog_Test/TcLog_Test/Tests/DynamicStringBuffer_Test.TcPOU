@@ -8,21 +8,21 @@
     <Method Name="LogsManyMessagesForManyCycles" Id="{d78771c9-0b67-46e5-83ea-6bb5e2fb05b9}">
       <Declaration><![CDATA[METHOD LogsManyMessagesForManyCycles
 VAR
-  result : STRING := '';
-  expected : STRING := '';
-  i : UDINT;
+	result : STRING := '';
+	expected : STRING := '';
+	i : UDINT;
 END_VAR
 VAR CONSTANT
-  Cycles : UDINT := 50;
-  Messages : UDINT := 50;
+	Cycles : UDINT := 50;
+	Messages : UDINT := 50;
 END_VAR
 VAR_INST
-  cycleCount : UDINT := 0;
-  logsManyMessagesForManyCyclesLogger : TcLogCore(BufferSize:=50 * 50 * 280); // Cycles * Messages * (max string length + fifo overhead (estimated))
-  logger : TcLog;
+	cycleCount : UDINT := 0;
+	logsManyMessagesForManyCyclesLogger : TcLogCore(BufferSize:=50 * 50 * 280); // Cycles * Messages * (max string length + fifo overhead (estimated))
+	logger : TcLog;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[TEST('LogsManyMessagesForManyCycles');
+        <ST><![CDATA[Test('LogsManyMessagesForManyCycles');
 
 logsManyMessagesForManyCyclesLogger
   .WriteToFile('c:\UnitTest\', 'test.txt')
@@ -51,7 +51,7 @@ IF cycleCount > (Cycles * Messages * 2 + 4) THEN
          Actual := result,
          Message := result);
  
-  TEST_FINISHED();
+  Test_Finished();
 END_IF]]></ST>
       </Implementation>
     </Method>

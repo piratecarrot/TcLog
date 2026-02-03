@@ -5,6 +5,7 @@
 /// For each signal that should be watched, a separate instance of `TcLogTrig` 
 /// must be created.
 {attribute 'linkalways'}
+{attribute 'no_explicit_call' := 'This FB is a CLASS and must be accessed using methods or properties'}
 FUNCTION_BLOCK PUBLIC TcLogTrig EXTENDS TcLog]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
@@ -12,15 +13,14 @@ FUNCTION_BLOCK PUBLIC TcLogTrig EXTENDS TcLog]]></Declaration>
     <Method Name="OnFallingEdge" Id="{438c69dd-36c1-47db-9ca4-1dd2e3805bdf}">
       <Declaration><![CDATA[/// Logs data on falling edge of `CLK`.
 {attribute 'hide_all_locals'}
-METHOD OnFallingEdge : REFERENCE TO TcLog
+METHOD PUBLIC OnFallingEdge : REFERENCE TO TcLog
 VAR_INPUT
   /// Falling edge triggers logging the data.
   CLK : BOOL; 
 END_VAR
 VAR_INST
     fTrig : Tc2_Standard.F_TRIG;
-END_VAR
-]]></Declaration>
+END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[fTrig(CLK:=CLK);
 
@@ -32,15 +32,14 @@ OnFallingEdge REF= THIS^;]]></ST>
     <Method Name="OnRisingEdge" Id="{6a00ac8c-8211-4843-82e2-2a60643eae38}">
       <Declaration><![CDATA[/// Logs data on rising edge of `CLK`.
 {attribute 'hide_all_locals'}
-METHOD OnRisingEdge : REFERENCE TO TcLog
+METHOD PUBLIC OnRisingEdge : REFERENCE TO TcLog
 VAR_INPUT
   /// Rising edge logs data.
   CLK : BOOL; 
 END_VAR
 VAR_INST
     rTrig : Tc2_Standard.R_TRIG;
-END_VAR
-]]></Declaration>
+END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[rTrig(CLK:=CLK);
 

@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
   <POU Name="DynamicStringBuffer" Id="{2126ae4b-ae71-49f5-b368-31058f9bbaa3}" SpecialFunc="None">
-    <Declaration><![CDATA[{attribute 'hide_all_locals'}
+    <Declaration><![CDATA[{attribute 'no_explicit_call' := 'This FB is a CLASS and must be accessed using methods or properties'}
+{attribute 'hide_all_locals'}
 FUNCTION_BLOCK INTERNAL DynamicStringBuffer
 VAR_OUTPUT
   Error : Error; // Error information of this FB

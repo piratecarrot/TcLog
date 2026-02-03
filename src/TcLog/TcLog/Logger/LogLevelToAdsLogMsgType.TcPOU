@@ -5,24 +5,23 @@
 {attribute 'hide'}
 FUNCTION INTERNAL LogLevelToAdsLogMsgType : DWORD
 VAR_INPUT
-  logLevel : LogLevels;
-END_VAR
-VAR
-  _retVal : DWORD;
+  level : LogLevel;
 END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[CASE logLevel OF
-  LogLevels.Debug, LogLevels.Information:
-    _retVal := Tc2_System.ADSLOG_MSGTYPE_HINT;
-  LogLevels.Warning:
-    _retVal := Tc2_System.ADSLOG_MSGTYPE_WARN;
-  LogLevels.Error, LogLevels.Fatal:
-    _retVal := Tc2_System.ADSLOG_MSGTYPE_ERROR;
-  ELSE
-    _retVal := Tc2_System.ADSLOG_MSGTYPE_HINT;
-END_CASE
-
-LogLevelToAdsLogMsgType := _retVal;]]></ST>
+      <ST><![CDATA[CASE level OF
+	LogLevel.Debug,
+	LogLevel.Information:
+		LogLevelToAdsLogMsgType := Tc2_System.ADSLOG_MSGTYPE_HINT;
+		
+	LogLevel.Warning:
+		LogLevelToAdsLogMsgType := Tc2_System.ADSLOG_MSGTYPE_WARN;
+		
+	LogLevel.Error,
+	LogLevel.Fatal:
+		LogLevelToAdsLogMsgType := Tc2_System.ADSLOG_MSGTYPE_ERROR;
+ELSE
+	LogLevelToAdsLogMsgType := Tc2_System.ADSLOG_MSGTYPE_HINT;
+END_CASE]]></ST>
     </Implementation>
   </POU>
 </TcPlcObject>

@@ -8,46 +8,59 @@
     <Method Name="CheckStringFormat" Id="{7cdf0bed-9f8a-4e92-8897-5aa7db257ce4}">
       <Declaration><![CDATA[METHOD CheckStringFormat
 VAR_INST
-  sut : DateTime;
-  expected : STRING;
-  result : STRING;
+	date_time : DateTime;
+	expected : STRING;
+	result : STRING;
 END_VAR
 VAR
-  localSystemTime : Tc2_Utilities.TIMESTRUCT;
+	local_system_time : Tc2_Utilities.TimeStruct;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[sut();
+        <ST><![CDATA[date_time.CyclicCall();
 
-TEST('CheckStringFormat');
+Test('CheckStringFormat');
 
-localSystemTime := sut.AsLocalSystemTime;
+local_system_time := date_time.AsLocalSystemTime;
 
-expected := Tc2_Standard.CONCAT('-', TO_STRING(localSystemTime.wYear));
-IF localSystemTime.wMonth < 10 THEN expected := Tc2_Standard.CONCAT(expected, '0'); END_IF
-expected := Tc2_Standard.CONCAT(expected, TO_STRING(localSystemTime.wMonth));
-IF localSystemTime.wDay < 10 THEN expected := Tc2_Standard.CONCAT(expected, '0'); END_IF
-expected := Tc2_Standard.CONCAT(expected, TO_STRING(localSystemTime.wDay));
+expected := Tc2_Standard.CONCAT('-', TO_STRING(local_system_time.wYear));
+IF local_system_time.wMonth < 10 THEN
+	expected := Tc2_Standard.CONCAT(expected, '0');
+END_IF
+
+expected := Tc2_Standard.CONCAT(expected, TO_STRING(local_system_time.wMonth));
+IF local_system_time.wDay < 10 THEN
+	expected := Tc2_Standard.CONCAT(expected, '0');
+END_IF
+
+expected := Tc2_Standard.CONCAT(expected, TO_STRING(local_system_time.wDay));
 expected := Tc2_Standard.CONCAT(expected, '-');
-IF localSystemTime.wHour < 10 THEN expected := Tc2_Standard.CONCAT(expected, '0'); END_IF
-expected := Tc2_Standard.CONCAT(expected, TO_STRING(localSystemTime.wHour));
+IF local_system_time.wHour < 10 THEN
+	expected := Tc2_Standard.CONCAT(expected, '0');
+END_IF
+
+expected := Tc2_Standard.CONCAT(expected, TO_STRING(local_system_time.wHour));
 expected := Tc2_Standard.CONCAT(expected, ':');
-IF localSystemTime.wMinute < 10 THEN expected := Tc2_Standard.CONCAT(expected, '0'); END_IF
-expected := Tc2_Standard.CONCAT(expected, TO_STRING(localSystemTime.wMinute));
+IF local_system_time.wMinute < 10 THEN 
+	expected := Tc2_Standard.CONCAT(expected, '0');
+END_IF
+
+expected := Tc2_Standard.CONCAT(expected, TO_STRING(local_system_time.wMinute));
 expected := Tc2_Standard.CONCAT(expected, ':');
-IF localSystemTime.wSecond < 10 THEN expected := Tc2_Standard.CONCAT(expected, '0'); END_IF
-expected := Tc2_Standard.CONCAT(expected, TO_STRING(localSystemTime.wSecond));
+IF local_system_time.wSecond < 10 THEN
+	expected := Tc2_Standard.CONCAT(expected, '0');
+END_IF
+
+expected := Tc2_Standard.CONCAT(expected, TO_STRING(local_system_time.wSecond));
 expected := Tc2_Standard.CONCAT(expected, '-');
+result := date_time.ToFormatString('-YYYYMMDD-hh:mm:ss-');
+IF date_time.Done THEN
+	AssertEquals(
+		Expected  :=  expected,
+		Actual    :=  result,
+		Message   :=  'Time formatting failed.'
+	);
 
-result := sut.ToFormatString('-YYYYMMDD-hh:mm:ss-');
-  
-IF sut.Done THEN
-  AssertEquals(
-    Expected  :=  expected,
-    Actual    :=  result,
-    Message   :=  'Time formatting failed.'
-  );
-
-  TEST_FINISHED();
+  Test_Finished();
 END_IF]]></ST>
       </Implementation>
     </Method>

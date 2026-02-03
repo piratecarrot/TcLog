@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <Itf Name="IStringBuilder" Id="{7894ea64-14bc-4fac-abd4-6b774e2bc30c}">
+    <Declaration><![CDATA[{attribute 'hide'}
+INTERFACE INTERNAL IStringBuilder]]></Declaration>
+    <Method Name="Append" Id="{f07d3a52-0f11-4359-9e69-7e05b60aa454}">
+      <Declaration><![CDATA[METHOD Append : IStringBuilder // Append text TO t current build STRING.
+VAR_INPUT
+    Text : Tc2_System.T_MaxString; //Text to append to current build string
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="AppendIf" Id="{37d785b8-f8f7-4316-a2a3-aba84c1e0c1c}">
+      <Declaration><![CDATA[METHOD AppendIf : IStringBuilder
+VAR_INPUT
+    Condition : BOOL;
+    Text : Tc2_System.T_MaxString;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="InsertAtLocation" Id="{2715975e-8247-4ee3-be2b-e1f19f3c2cd5}">
+      <Declaration><![CDATA[METHOD InsertAtLocation : IStringBuilder
+VAR_INPUT
+    Text : Tc2_System.T_MaxString;
+    Position : INT;
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="PadLeft" Id="{a6cb201f-7738-4be7-bfc7-d4cd20ba8e39}">
+      <Declaration><![CDATA[METHOD PadLeft : IStringBuilder
+VAR_INPUT
+    text : Tc2_System.T_MaxString; // Text to append to current build string
+    length : INT; // Total length of text + padding
+    c : STRING(1); // Character to be padded left of text
+END_VAR]]></Declaration>
+    </Method>
+    <Method Name="Reset" Id="{a1746376-c49a-474a-be89-9894f452add1}">
+      <Declaration><![CDATA[METHOD Reset : ILimitedStringBuilder //Reset current build STRING TO an empty STRING.]]></Declaration>
+    </Method>
+    <Method Name="ToString" Id="{526d80b0-3cd3-4087-bd30-141b1ace9e45}">
+      <Declaration><![CDATA[METHOD ToString : Tc2_System.T_MaxString //Returns current build STRING.]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

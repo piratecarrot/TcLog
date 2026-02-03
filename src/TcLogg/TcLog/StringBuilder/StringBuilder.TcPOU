@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="StringBuilder" Id="{103416e3-04d2-462e-9308-e26393ba12af}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK INTERNAL StringBuilder IMPLEMENTS IStringBuilder, ILimitedStringBuilder
+VAR
+  {attribute 'hide'}
+  _workString : Tc2_System.T_MaxString;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Append" Id="{d9c97d35-4631-4976-8d6e-85684c8d322b}">
+      <Declaration><![CDATA[METHOD PUBLIC Append : IStringBuilder // Append text TO t current build STRING.
+VAR_INPUT
+  text : Tc2_System.T_MaxString; //text to append to current build string
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_workString:= Tc2_Standard.CONCAT(_workString,text);
+Append := THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendIf" Id="{21fd12c9-d7ba-44b0-b83d-77ced5c2f648}">
+      <Declaration><![CDATA[METHOD PUBLIC AppendIf : IStringBuilder
+VAR_INPUT
+  condition : BOOL;
+  text : Tc2_System.T_MaxString;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF condition THEN
+  _workString:= Tc2_Standard.CONCAT(_workString,text);
+END_IF
+AppendIf := THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="InsertAtLocation" Id="{edc09c35-76a5-4ade-a575-93af10385246}">
+      <Declaration><![CDATA[METHOD PUBLIC InsertAtLocation : IStringBuilder
+VAR_INPUT
+  text : Tc2_System.T_MaxString;
+  position : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_workString := Tc2_Standard.INSERT(_workSTring,text,position);
+InsertAtLocation  := THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="PadLeft" Id="{ba4630dc-9404-4b1c-88bb-e68424aa433f}">
+      <Declaration><![CDATA[METHOD PadLeft : IStringBuilder
+VAR_INPUT
+  text : Tc2_System.T_MaxString; // Text to append to current build string
+  length : INT; // Total length of text + padding
+  c : STRING(1); // Character to be padded left of text
+END_VAR
+VAR
+  i : INT;
+  padLength : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Add left padding
+padLength := Tc2_Standard.LEN(text) - length;
+FOR i := 1 TO padLength DO
+  _workString:= Tc2_Standard.CONCAT(_workString, c);
+END_FOR
+
+// Add text
+_workString:= Tc2_Standard.CONCAT(_workString,text);
+
+PadLeft := THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Reset" Id="{c2905509-e803-46bc-96f9-6fbadc438d7b}">
+      <Declaration><![CDATA[METHOD PUBLIC Reset : ILimitedStringBuilder //Reset current build STRING TO an empty STRING.]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_workString:='';
+Reset := THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ToString" Id="{0e853e01-af75-4bbd-a092-87bc9020cbed}">
+      <Declaration><![CDATA[METHOD PUBLIC ToString : Tc2_System.T_MaxString //Returns current build STRING.]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ToString := _workString;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

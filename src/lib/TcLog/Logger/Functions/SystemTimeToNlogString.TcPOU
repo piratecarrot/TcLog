@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="SystemTimeToNlogString" Id="{34ac88cd-d915-4434-a10e-07ba67eeb8e3}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION INTERNAL SystemTimeToNlogString : T_MaxString
+VAR_INPUT
+	system_time : Tc2_Utilities.TimeStruct;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[SystemTimeToNlogString := Tc2_Standard.Replace(Tc2_Utilities.SystemTime_To_String(system_time), ' ', 1, 11);]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

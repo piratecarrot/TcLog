@@ -24,7 +24,7 @@ END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[Format := message_builder
 	.Reset()
-	.Append(Tc2_Utilities.SystemTime_To_String(event.timestamp))
+	.Append(SystemTimeToNlogString(event.timestamp))
 	.Append(DELIMITER)
 	.Append(TO_STRING(event.level))
 	.Append(DELIMITER)

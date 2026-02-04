@@ -82,6 +82,9 @@
     <Compile Include="Logger\Functions\ShortenInstancePath.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Logger\Functions\SystemTimeToNlogString.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Logger\Interfaces\ILog.TcIO">
       <SubType>Code</SubType>
     </Compile>

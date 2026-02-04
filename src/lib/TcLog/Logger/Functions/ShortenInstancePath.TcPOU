@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1">
   <POU Name="ShortenInstancePath" Id="{00dbc83d-744b-4619-b903-3d27d4f72075}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION ShortenInstancePath : T_MaxString
+    <Declaration><![CDATA[FUNCTION INTERNAL ShortenInstancePath : T_MaxString
 VAR_INPUT
 	path : Tc2_System.T_MaxString; // Instance path to be shortened.
 END_VAR

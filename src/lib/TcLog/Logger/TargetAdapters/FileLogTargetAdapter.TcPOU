@@ -11,6 +11,7 @@ VAR
 	// Configuration
 	file_path : STRING := 'C:\';
 	file_name : STRING := 'tclog.log';
+	
 	rolling_interval : RollingInterval := RollingInterval.Daily;
 	/// When should old log files be deleted? Unit: days. Set it to `0` if log files should never be deleted. 
 	log_lifespan : UINT := 0;
@@ -29,6 +30,9 @@ VAR
 	_busy : BOOL; // Logger is busy, typically with writing logs to the file system.
 	
 	rolling_interval_detector : RollingIntervalDetector;
+	
+	file_name_truncated : STRING;
+	file_name_extension : STRING;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>

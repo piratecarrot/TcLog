@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <Itf Name="LogEventBuffer" Id="{16066395-45f0-43f0-9757-aebb6b34a4d0}">
+    <Declaration><![CDATA[INTERFACE PUBLIC LogEventBuffer EXTENDS __SYSTEM.IQueryInterface]]></Declaration>
+    <Property Name="IsFull" Id="{6e369abe-4e03-4827-9255-db6582bc65b0}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC IsFull : BOOL]]></Declaration>
+      <Get Name="Get" Id="{1febb82c-2e49-4124-98f0-1cb8e5865cc3}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="Pop" Id="{c19c601f-961f-4523-a3b4-b11196398b6b}">
+      <Declaration><![CDATA[METHOD PUBLIC Pop : LogEvent]]></Declaration>
+    </Method>
+    <Method Name="Push" Id="{d2c783af-60f5-40e1-a6be-94784b56196f}">
+      <Declaration><![CDATA[METHOD PUBLIC Push : BOOL
+VAR_INPUT
+	event : LogEvent;
+END_VAR]]></Declaration>
+    </Method>
+    <Property Name="Size" Id="{7716115a-9344-492f-941d-d79d37d865c2}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC Size : UDINT]]></Declaration>
+      <Get Name="Get" Id="{060d0ed7-e3a9-498c-a01b-6fa649a60cf2}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>

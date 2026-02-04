@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.17">
+  <POU Name="DateTime_Test" Id="{17778d39-f7c2-42cc-ae98-24f6bf09d7bd}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK DateTime_Test EXTENDS TcUnit.FB_TestSuite]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CheckStringFormat();]]></ST>
+    </Implementation>
+    <Method Name="CheckStringFormat" Id="{7cdf0bed-9f8a-4e92-8897-5aa7db257ce4}">
+      <Declaration><![CDATA[METHOD CheckStringFormat
+VAR_INST
+	date_time : DateTime;
+	expected : STRING;
+	result : STRING;
+END_VAR
+VAR
+	local_system_time : Tc2_Utilities.TimeStruct;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[date_time.CyclicCall();
+
+Test('CheckStringFormat');
+
+local_system_time := date_time.AsLocalSystemTime;
+
+expected := Tc2_Standard.CONCAT('-', TO_STRING(local_system_time.wYear));
+IF local_system_time.wMonth < 10 THEN
+	expected := Tc2_Standard.CONCAT(expected, '0');
+END_IF
+
+expected := Tc2_Standard.CONCAT(expected, TO_STRING(local_system_time.wMonth));
+IF local_system_time.wDay < 10 THEN
+	expected := Tc2_Standard.CONCAT(expected, '0');
+END_IF
+
+expected := Tc2_Standard.CONCAT(expected, TO_STRING(local_system_time.wDay));
+expected := Tc2_Standard.CONCAT(expected, '-');
+IF local_system_time.wHour < 10 THEN
+	expected := Tc2_Standard.CONCAT(expected, '0');
+END_IF
+
+expected := Tc2_Standard.CONCAT(expected, TO_STRING(local_system_time.wHour));
+expected := Tc2_Standard.CONCAT(expected, ':');
+IF local_system_time.wMinute < 10 THEN 
+	expected := Tc2_Standard.CONCAT(expected, '0');
+END_IF
+
+expected := Tc2_Standard.CONCAT(expected, TO_STRING(local_system_time.wMinute));
+expected := Tc2_Standard.CONCAT(expected, ':');
+IF local_system_time.wSecond < 10 THEN
+	expected := Tc2_Standard.CONCAT(expected, '0');
+END_IF
+
+expected := Tc2_Standard.CONCAT(expected, TO_STRING(local_system_time.wSecond));
+expected := Tc2_Standard.CONCAT(expected, '-');
+result := date_time.ToFormatString('-YYYYMMDD-hh:mm:ss-');
+IF date_time.Done THEN
+	AssertEquals(
+		Expected  :=  expected,
+		Actual    :=  result,
+		Message   :=  'Time formatting failed.'
+	);
+
+  Test_Finished();
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

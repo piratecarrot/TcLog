@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <Itf Name="LogTargetAdapter" Id="{ac3659bf-3503-42a9-bb64-6b1d9ba4f3f5}">
+    <Declaration><![CDATA[INTERFACE PUBLIC LogTargetAdapter EXTENDS __System.IQueryInterface]]></Declaration>
+    <Method Name="Run" Id="{4ddd99af-9e05-4680-8835-ec19bcfc473f}">
+      <Declaration><![CDATA[METHOD PUBLIC Run]]></Declaration>
+    </Method>
+    <Method Name="SendLogEvent" Id="{70d2d06d-c23e-42bd-9f71-d1d9247f79db}">
+      <Declaration><![CDATA[METHOD PUBLIC SendLogEvent : BOOL
+VAR_INPUT
+	event : LogEvent;
+END_VAR]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

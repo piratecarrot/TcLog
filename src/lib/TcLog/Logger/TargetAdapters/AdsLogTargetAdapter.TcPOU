@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="AdsLogTargetAdapter" Id="{416ec712-fa42-449e-b7e8-011b9755b87d}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'linkalways'}
+{attribute 'no_explicit_call' := 'This FB is a CLASS and must be accessed using methods or properties'}
+FUNCTION_BLOCK PUBLIC AdsLogTargetAdapter IMPLEMENTS LogTargetAdapter
+VAR
+	formatter : DefaultAdsLogEventFormatter;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Run" Id="{87c612cd-8012-4f19-95eb-e105b1ccb4db}">
+      <Declaration><![CDATA[METHOD PUBLIC Run]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Do nothing for this, as it directly logs]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SendLogEvent" Id="{3e9a19fd-876a-41d8-81fb-3daddc75cd4b}">
+      <Declaration><![CDATA[METHOD PUBLIC SendLogEvent : BOOL
+VAR_INPUT
+	event : LogEvent;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Tc2_System.AdsLogStr(
+	AdsLog_MsgType_Log OR LogLevelToAdsLogMsgType(event.level), 
+	formatter.Format(event), 
+	''
+);]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

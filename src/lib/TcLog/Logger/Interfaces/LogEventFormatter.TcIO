@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <Itf Name="LogEventFormatter" Id="{ee5ac149-1672-473c-9849-4b71bf68d930}">
+    <Declaration><![CDATA[INTERFACE PUBLIC LogEventFormatter EXTENDS __SYSTEM.IQueryInterface]]></Declaration>
+    <Method Name="Format" Id="{36298a3b-e769-43d0-b78f-48067b72a299}">
+      <Declaration><![CDATA[METHOD Format : T_MaxString
+VAR_INPUT
+	event : LogEvent;
+END_VAR]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

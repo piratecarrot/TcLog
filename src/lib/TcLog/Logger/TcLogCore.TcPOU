@@ -1,0 +1,323 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="TcLogCore" Id="{d1b38a4b-e969-499e-8c20-95d2f11cc391}" SpecialFunc="None">
+    <Declaration><![CDATA[/// `TcLogCore` provides the base functionality of the logger and sets the configuration.
+/// The logger can be configured by calling its methods that set the configuration.
+///
+/// > [!NOTE]
+/// > `TcLogCore.RunLogger()` should be called once each cycle. The configuration methods should be called **before** 
+/// > `RunLogger` is called.
+///
+/// When declaring an instance of TcLogCore, the ininital buffer size has to be set. If the buffer size is set too low, it will expand
+/// automatically if enough memory is available.
+///
+/// To set the inital buffer size to accomodate 100 messages, use it like this:
+///
+/// ```st
+/// VAR
+///   my_logger: TcLogCore(BufferSize := 100 * (Tc2_System.MAX_STRING_LENGTH * Constants.FifoOverhead));
+/// END_VAR
+/// ```
+///
+{attribute 'linkalways'}
+{attribute 'no_explicit_call' := 'This FB is a CLASS and must be accessed using methods or properties'}
+//{attribute 'hide_all_locals'}
+FUNCTION_BLOCK PUBLIC TcLogCore IMPLEMENTS ILogCore
+VAR
+	logging_singleton : TcLog; // Logger-Singleton: Required to provide Singleton-functionality for TcLog.
+	utc_time_as_file_time : Tc2_Utilities.T_FileTime; // Current utc time as filetime
+	local_time_as_system_time : Tc2_Utilities.TimeStruct; // Current local time as timestring
+	local_time_as_string : STRING; // Current local time as string
+	log_cache : DynamicStringBuffer; // Dynamic string buffer to cache logs to be processed
+	start_logging_configuration : BOOL; // Aux variable to provide fluent interface.
+	internal_error_occured : BOOL; // Aux variable to log internal errors to Error-property.                                                   				
+	_config : LoggingConfiguration := (
+		MinimumLevel := LogLevel.Debug,
+		Delimiter := '|',
+		IncludeInstancePath := FALSE,
+		TimestampFormat := 'YYYYMMDD_hhmm_',
+		ValidTimestampsOnly := FALSE
+	); // Logging configuration. Is set by invoking configuration methods.
+	_error : Error; // Contains information about internal error.
+	_busy : BOOL; // Logger is busy, typically with writing logs to the file system.
+	time_info_ready : BOOL := FALSE; // Set to true once the time information is available
+	
+	default_log_target_adapter : AdsLogTargetAdapter;
+
+	adapter_1 : LogTargetAdapter := default_log_target_adapter;
+	adapter_2 : LogTargetAdapter;
+	adapter_3 : LogTargetAdapter;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Nothing to be done here. Logger works by invoking its methods.
+// "RunLogger" contains all the implementation that has to be processed cyclically.]]></ST>
+    </Implementation>
+    <Method Name="AddAdapter1" Id="{42d55b8d-e1b3-4dcf-b580-d90880fda7c1}">
+      <Declaration><![CDATA[METHOD PUBLIC AddAdapter1 : REFERENCE TO TcLogCore
+VAR_INPUT
+	adapter : LogTargetAdapter;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF adapter <> 0 THEN
+	adapter_1 := adapter;
+END_IF
+
+AddAdapter1 REF= THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AddAdapter2" Id="{d8db58ba-be65-4cd6-9cac-1c581d70b00b}">
+      <Declaration><![CDATA[METHOD PUBLIC AddAdapter2 : REFERENCE TO TcLogCore
+VAR_INPUT
+	adapter : LogTargetAdapter;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF adapter <> 0 THEN
+	adapter_2 := adapter;
+END_IF
+
+AddAdapter2 REF= THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AddAdapter3" Id="{9ac35572-079b-4c7a-a9c6-0fbcdafa2d7c}">
+      <Declaration><![CDATA[METHOD PUBLIC AddAdapter3 : REFERENCE TO TcLogCore
+VAR_INPUT
+	adapter : LogTargetAdapter;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF adapter <> 0 THEN
+	adapter_3 := adapter;
+END_IF
+
+AddAdapter3 REF= THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Busy" Id="{b4ea3839-cb47-4f13-95fc-c4f72ed1ab1c}">
+      <Declaration><![CDATA[/// `Busy` evaluates to `TRUE` as long as the log file is kept open to append new log messages
+/// or there are pending messages in the queue to be written to the logfile.
+{attribute 'monitoring':='call'}
+PROPERTY PUBLIC Busy : BOOL]]></Declaration>
+      <Get Name="Get" Id="{196a9a34-33d9-4154-837f-91768bc70efc}">
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Busy := _busy;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{198e1a08-5578-4071-919c-cf54ca3cb46d}">
+        <Declaration><![CDATA[PRIVATE]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_busy := Busy;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="Configuration" Id="{e3d8da8e-a380-4446-8b1d-7995a970de44}">
+      <Declaration><![CDATA[/// Returns the current configuration of the logger.
+{attribute 'monitoring':='variable'}
+PROPERTY PUBLIC Configuration : LoggingConfiguration]]></Declaration>
+      <Get Name="Get" Id="{01a1c7d9-2988-48df-86c8-15f5ed9657f3}">
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Configuration := _config;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Error" Id="{5610f441-4b26-4a11-9b83-8d14b944d1d6}">
+      <Declaration><![CDATA[/// Returns information about internal errors.
+{attribute 'monitoring':='call'}
+{attribute 'suppress_wrn_C0410'}
+PROPERTY Error : REFERENCE TO Error
+]]></Declaration>
+      <Get Name="Get" Id="{fac27f62-5420-4b16-a8c9-901ef364d0d3}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Error REF= _error;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="FB_init" Id="{7fb1634c-c92f-4ed1-a7a5-adc0044327bb}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL; // if TRUE, the instance afterwards gets moved into the copy code (online change)
+	/// Initial buffer size for the internal log message buffer
+	bufferSize : UDINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[logging_singleton.Init(THIS^);
+log_cache.Init(bufferSize);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="IncludeInstancePath" Id="{37657fa7-54f8-40b1-8128-13f2ab0758fd}">
+      <Declaration><![CDATA[/// Configuration method. If this method is called, the instance path where the log 
+/// messages has been triggered will be included in the log message. 
+METHOD PUBLIC IncludeInstancePath : REFERENCE TO TcLogCore]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_config.IncludeInstancePath := TRUE;
+
+IncludeInstancePath REF= This^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="LogStandardFormat" Id="{5eb90db7-239e-468a-be19-66d260fc9cfa}">
+      <Declaration><![CDATA[/// Logger method. It should only be called from within objects that implement `ILog`.
+/// Logs in the standard format. This includes
+/// - timestamp
+/// - log level
+/// - log message
+/// - instance path of logging source (optional)
+/// The message will only be logged if the logging level exceeds the configured minimum logging level.
+METHOD PUBLIC LogStandardFormat : BOOL
+VAR_INPUT
+	/// Instance path of calling logger to locate source of logging message.
+	instance_path : Tc2_System.T_MaxString;
+
+	/// Log level of message. 
+	level : LogLevel; 
+
+	/// Data to be logged.
+	message : Tc2_System.T_MaxString;	
+END_VAR
+VAR_INST
+	event : LogEvent;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF level >= _config.MinimumLevel AND (TimeInfoReady OR NOT _config.ValidTimestampsOnly) THEN
+	event.timestamp := local_time_as_system_time;
+	event.level := level;
+	event.logger := instance_path;
+	event.message := message;
+
+	IF adapter_1 <> 0 THEN
+		adapter_1.SendLogEvent(event);
+	END_IF
+	
+	IF adapter_2 <> 0 THEN
+		adapter_2.SendLogEvent(event);
+	END_IF
+	
+	IF adapter_3 <> 0 THEN
+		adapter_3.SendLogEvent(event);
+	END_IF
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="MinimumLevel" Id="{184800a6-c363-4941-96c0-25802b6c2195}">
+      <Declaration><![CDATA[/// Configuration method.
+/// Sets the minimum log level. Log messages below this level 
+/// will not be logged.
+METHOD PUBLIC MinimumLevel : REFERENCE TO TcLogCore
+VAR_INPUT
+  /// Minimum log level to be logged.
+	level : LogLevel; 
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_config.MinimumLevel := level;
+
+MinimumLevel REF=THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="RunLogger" Id="{803fadf5-6bd4-4200-a13b-16a67d07d8d9}">
+      <Declaration><![CDATA[/// Cyclic method of Logger.
+/// This method has to be executed in every PLC cycle and runs 
+/// all internal methods that have to be executed cyclically.
+/// > [!NOTE]
+/// > This method should be the last method of `TcLogCore` to be called in each cycle.
+{attribute 'hide_all_locals'}
+METHOD PUBLIC RunLogger : BOOL
+VAR_INST
+	new_day : Tc2_Standard.R_Trig; 
+	date_time : DateTime;
+	delete_expired_log_files : DeleteOldFiles;
+	file_name_string_builder : StringBuilder;
+	time_stamp : STRING; // Timestamp used for filename
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Generate time data (shared state)
+date_time.CyclicCall();
+IF date_time.Done THEN
+	time_info_ready := TRUE;
+END_IF
+
+local_time_as_system_time := date_time.AsLocalSystemTime;
+local_time_as_string := date_time.AsLocalSystemTimeString;
+utc_time_as_file_time := date_time.AsUtcFileTime;
+
+IF adapter_1 <> 0 THEN
+	adapter_1.Run();
+END_IF
+
+IF adapter_2 <> 0 THEN
+	adapter_2.Run();
+END_IF
+
+IF adapter_3 <> 0 THEN
+	adapter_3.Run();
+END_IF
+
+// Reset Logging configuration: neccesary in order to provide fluent interface
+start_logging_configuration := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetDelimiter" Id="{174c6212-1cd1-4e95-ae71-92ba063e3be0}">
+      <Declaration><![CDATA[/// Configuration method
+/// Sets delimiter between different columns of log file.
+METHOD PUBLIC SetDelimiter : REFERENCE TO TcLogCore
+VAR_INPUT
+  /// Delimiter between different columns of log file.
+	delimiter : STRING(1); 
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_config.Delimiter := delimiter;
+
+SetDelimiter REF=THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="TimeInfoReady" Id="{54c6c479-5e1d-451f-a86a-69dc83c416dc}">
+      <Declaration><![CDATA[/// `TimeInfoReady` evaluates to `TRUE` once the time information used by determine
+/// the timestamp for the message is available.
+{attribute 'monitoring':='call'}
+PROPERTY PUBLIC TimeInfoReady : BOOL]]></Declaration>
+      <Get Name="Get" Id="{85e8d87e-b3db-489a-bdce-0fefffb116e4}">
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TimeInfoReady := time_info_ready;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="TimestampFormat" Id="{03e96e15-d1a5-4041-b07d-134333275170}">
+      <Declaration><![CDATA[/// Configuration method.
+/// Sets the format of the timestamp in the file name. 
+/// 
+/// The following format options are available:
+///	Y : year
+///	M : month
+/// D : day
+/// h : hour 
+/// m : minute
+/// s : second
+/// i : millisecond
+/// 
+/// Example: _YYMMDD-hh:mm:ss:iii_
+/// => _20210812-12:30:22:123_
+METHOD PUBLIC TimestampFormat : REFERENCE TO TcLogCore
+VAR_INPUT
+  /// Format the timestamp should have.
+	format : STRING; 
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_config.TimestampFormat := format;
+
+TimestampFormat REF= THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ValidTimestampsOnly" Id="{153f65bb-4e2c-4c4e-873b-44caa283f25b}">
+      <Declaration><![CDATA[/// Configuration method. If this method is called, only valid timestamps are logged.
+/// Note that using this configuration will skip logging anything during the first few PLC cycles, 
+/// as TwinCAT needs a few cycles to initialize its time information.
+METHOD PUBLIC ValidTimestampsOnly : REFERENCE TO TcLogCore]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_config.ValidTimestampsOnly := TRUE;
+
+ValidTimestampsOnly REF= This^;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

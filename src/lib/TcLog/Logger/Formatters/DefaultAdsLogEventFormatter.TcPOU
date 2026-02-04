@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="DefaultAdsLogEventFormatter" Id="{865819e6-2249-459f-9e63-68116177220c}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'linkalways'}
+{attribute 'no_explicit_call' := 'This FB is a CLASS and must be accessed using methods or properties'}
+FUNCTION_BLOCK DefaultAdsLogEventFormatter IMPLEMENTS LogEventFormatter
+VAR
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Format" Id="{b32331e9-571d-445c-b5f5-54ca003f258d}">
+      <Declaration><![CDATA[METHOD PUBLIC Format : T_MaxString
+VAR_INPUT
+	event : LogEvent;
+END_VAR
+VAR_INST
+	{attribute 'hide'}
+	message_builder : StringBuilder;
+END_VAR
+VAR CONSTANT
+	DELIMITER : STRING := '|';
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Format := message_builder
+	.Reset()
+	.Append(event.logger)
+	.Append(DELIMITER)
+	.Append(event.message)
+	.ToString();]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

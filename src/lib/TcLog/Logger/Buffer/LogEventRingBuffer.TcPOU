@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="LogEventRingBuffer" Id="{f7f992ad-0f63-42dd-85fc-3922fa549465}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK PUBLIC LogEventRingBuffer
+VAR_GENERIC CONSTANT
+	capacity : UDINT := 100;
+END_VAR
+IMPLEMENTS LogEventBuffer
+VAR
+	buffer : ARRAY[0..capacity-1] OF LogEvent;
+	head : UDINT;
+	tail : UDINT;
+	_size : UDINT;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="IsFull" Id="{2ba13751-78d4-4a60-bc61-1913ca7e7622}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC IsFull : BOOL]]></Declaration>
+      <Get Name="Get" Id="{137bd04e-e744-4b99-9a7e-e311dd346079}">
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IsFull := _size = capacity;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Pop" Id="{cbf3657d-8a7d-4171-9a57-7aaeedd38d19}">
+      <Declaration><![CDATA[METHOD PUBLIC Pop : LogEvent
+VAR
+	item : LogEvent;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF _size = 0 THEN
+	RETURN;
+END_IF
+
+item := buffer[head];
+buffer[head] := 0; // Help garbage collection
+head := (head + 1) MOD capacity;
+_size := _size - 1;
+Pop := item;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Push" Id="{ff798188-f205-4a9f-87bb-7d5b2d254df7}">
+      <Declaration><![CDATA[METHOD PUBLIC Push : BOOL
+VAR_INPUT
+	item : LogEvent;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[buffer[tail] := item;
+tail := (tail + 1) MOD capacity;
+IF _size < capacity THEN
+	_size := _size + 1;
+ELSE
+	head := (head + 1) MOD capacity; // Overwrite oldest element
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Size" Id="{e7f9c17b-2d80-4e6e-b3e9-b36bf2a519b7}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC Size : UDINT]]></Declaration>
+      <Get Name="Get" Id="{a923803f-ce28-4810-a210-882684d87852}">
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Size := _size;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+  </POU>
+</TcPlcObject>

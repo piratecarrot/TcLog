@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="ShortenInstancePath" Id="{00dbc83d-744b-4619-b903-3d27d4f72075}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION ShortenInstancePath : T_MaxString
+VAR_INPUT
+	path : Tc2_System.T_MaxString; // Instance path to be shortened.
+END_VAR
+VAR
+	i : UINT;
+	shortened_path : Tc2_System.T_MaxString;
+	position_in_string : INT := 0;
+	position_of_last_dot : INT := 0;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[shortened_path := path;
+
+// Find last '.'
+WHILE(Tc2_Standard.FIND(shortened_path, '.') > 0) DO
+	position_in_string := Tc2_Standard.Find(shortened_path, '.');
+	shortened_path := Tc2_Standard.Delete(shortened_path, position_in_string + 1, 0); 
+	position_of_last_dot := position_of_last_dot + position_in_string;
+END_WHILE
+
+shortened_path := Path;
+
+// Delete instantiation of this FB (obvious information)
+shortened_path := Tc2_Standard.Delete(shortened_path, Tc2_Standard.Len(shortened_path) - position_of_last_dot + 1, position_of_last_dot);
+
+// Delete project information
+position_in_string := Tc2_Standard.Find(shortened_path, '.');
+shortened_path := Tc2_Standard.Delete(shortened_path, position_in_string + 1, 0);
+
+// Delete PLC information
+position_in_string := Tc2_Standard.Find(shortened_path, '.');
+shortened_path := Tc2_Standard.Delete(shortened_path, position_in_string + 1, 0);
+
+ShortenInstancePath := shortened_path;]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="Main" Id="{cd559602-e31e-4d5b-ae62-cc768a3b78df}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Main
+VAR
+	core_logger : TcLogCore(BufferSize := 50 * 50 * (Tc2_System.MAX_STRING_LENGTH + Constants.FifoOverhead));
+	logger : TcLog;
+	ads_adapter : AdsLogTargetAdapter;
+	
+	trigger_log : BOOL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[core_logger
+	.IncludeInstancePath()
+	.MinimumLevel(LogLevel.Debug)
+	.AddAdapter1(ads_adapter)
+	.RunLogger();
+
+IF trigger_log THEN
+	trigger_log := FALSE;
+	logger.Debug('Yo');
+END_IF]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

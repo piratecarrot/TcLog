@@ -1,0 +1,229 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FileLogTargetAdapter" Id="{172ddd48-7f84-4661-9ada-761cf85c51a9}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'linkalways'}
+{attribute 'no_explicit_call' := 'This FB is a CLASS and must be accessed using methods or properties'}
+FUNCTION_BLOCK PUBLIC FileLogTargetAdapter IMPLEMENTS LogTargetAdapter
+VAR CONSTANT
+	message_buffer_capacity : UDINT := 100; // Number of messages that can be buffered
+END_VAR
+VAR
+	// Configuration
+	file_path : STRING := 'C:\';
+	file_name : STRING := 'tclog.log';
+	rolling_interval : RollingInterval := RollingInterval.Daily;
+	/// When should old log files be deleted? Unit: days. Set it to `0` if log files should never be deleted. 
+	log_lifespan : UINT := 0;
+	timestamp_format : STRING := 'YYYYMMDD_hhmm_';
+
+	log_cache : DynamicStringBuffer;
+	date_time : DateTime;
+
+	utc_time_as_file_time : Tc2_Utilities.T_FileTime; // Current utc time as filetime
+	local_time_as_system_time : Tc2_Utilities.TimeStruct; // Current local time as timestring
+	local_time_as_string : STRING; // Current local time as string
+
+	formatter : DefaultFileLogEventFormatter;
+
+	_error : Error; // Contains information about internal error.
+	_busy : BOOL; // Logger is busy, typically with writing logs to the file system.
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="Configuration" Id="{28a48266-87e4-495d-a151-e76531510359}" />
+    <Folder Name="Constructor" Id="{8be6375e-8e45-4885-bc59-a248a8bf47dc}" />
+    <Folder Name="Tasks" Id="{2d4fb0a7-84f4-479d-99d6-59c3ad37f26e}" />
+    <Method Name="DeleteLogFilesAfterDays" Id="{32410822-67bd-4c13-a83d-53eb1112e24c}" FolderPath="Configuration\">
+      <Declaration><![CDATA[/// Configuration method which sets the lifespan of log files. Once exceeded, they will be deleted.
+METHOD PUBLIC DeleteLogFilesAfterDays : REFERENCE TO FileLogTargetAdapter
+VAR_INPUT
+	/// Lifespan of logfiles in days.
+	lifespan : UINT; 
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[log_lifespan := lifespan;
+
+DeleteLogFilesAfterDays REF= THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FB_Init" Id="{5d0e415b-4d50-44cf-9e0d-7675377fd9fc}" FolderPath="Constructor\">
+      <Declaration><![CDATA[//FB_Init is always available implicitly and it is used primarily for initialization.
+//The return value is not evaluated. For a specific influence, you can also declare the
+//methods explicitly and provide additional code there with the standard initialization
+//code. You can evaluate the return value.
+METHOD FB_Init: BOOL
+VAR_INPUT
+    bInitRetains: BOOL; // TRUE: the retain variables are initialized (reset warm / reset cold)
+    bInCopyCode: BOOL;  // TRUE: the instance will be copied to the copy code afterward (online change)   
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[log_cache.Init(message_buffer_capacity * (Tc2_System.Max_String_Length + Constants.FifoOverhead));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FileName" Id="{6ad6fc1a-70ae-4fe8-a426-3bcf9a84e855}" FolderPath="Configuration\">
+      <Declaration><![CDATA[/// Configuration method
+/// Sets file_name of log file.
+METHOD PUBLIC FileName : REFERENCE TO FileLogTargetAdapter
+VAR_INPUT
+	/// File name where the logs should be written to. Should not include path.
+	file_name : STRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.file_name := file_name;
+
+FileName REF= THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FilePath" Id="{339d2aac-b7be-4a39-aa0b-4a5126dc4906}" FolderPath="Configuration\">
+      <Declaration><![CDATA[/// Configuration method
+/// Sets file_path for log files.
+METHOD PUBLIC FilePath : REFERENCE TO FileLogTargetAdapter
+VAR_INPUT
+	/// File path where the logs should be written to. Will be prefixed to `FileName`
+	file_path : STRING; 
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.file_path := file_path;
+
+FilePath REF= THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FlushCache" Id="{37c75623-56f0-45e8-8045-828b74c5a501}" FolderPath="Tasks\">
+      <Declaration><![CDATA[/// Flushes the logging cache. All messages that have not yet been processed will be lost.
+METHOD PUBLIC FlushCache : BOOL]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[log_cache.FlushCache();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="RollingIntervalReached" Id="{c9546229-e455-4192-9520-f00430cb9e9e}" FolderPath="Tasks\">
+      <Declaration><![CDATA[// Checks the specified rolling interval for the file name.
+// Generates new file name if rolling intervall exceeded.
+{attribute 'hide_all_locals'}
+{attribute 'hide'}
+METHOD PRIVATE RollingIntervalReached : BOOL
+VAR_INPUT
+	current_utc_time : Tc2_Utilities.TimeStruct; // Current system time as utc
+	rolling_interval : RollingInterval; // Rolling interval 
+END_VAR
+VAR_INST
+	new_hour : Tc2_Standard.R_Trig;
+	new_day : Tc2_Standard.R_Trig;
+	new_month : Tc2_Standard.R_Trig;
+	
+	hour_rolled : BOOL;
+	day_rolled : BOOL;
+	month_rolled : BOOL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[new_hour(
+	Clk := (current_utc_time.wMinute = 0 AND current_utc_time.wSecond = 0), 
+	Q => hour_rolled
+);
+
+new_day(
+	Clk := (hour_rolled AND current_utc_time.wHour = 0), 
+	Q => day_rolled
+);
+
+new_month(
+	Clk := (day_rolled AND current_utc_time.wDay = 1),
+	Q => month_rolled
+);
+
+RollingIntervalReached :=	(hour_rolled 	AND rolling_interval = RollingInterval.Hourly)	OR
+							(day_rolled 	AND rolling_interval = RollingInterval.Daily)	OR
+							(month_rolled 	AND rolling_interval = RollingInterval.Monthly);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Run" Id="{ec75d489-513f-4f09-8e6c-6d2e82b7e0d2}" FolderPath="Tasks\">
+      <Declaration><![CDATA[METHOD PUBLIC Run
+VAR_INST
+	new_day : Tc2_Standard.R_Trig; 
+	delete_expired_log_files : DeleteOldFiles;
+	file_name_string_builder : StringBuilder;
+	time_stamp : STRING; // Timestamp used for filename
+	time_info_ready : BOOL := FALSE; // Set to true once the time information is available
+	internal_error_occured : BOOL; // Aux variable to log internal errors to Error-property.
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Generate time data (shared state)
+date_time.CyclicCall();
+IF date_time.Done THEN
+	time_info_ready := TRUE;
+END_IF
+
+local_time_as_system_time := date_time.AsLocalSystemTime;
+local_time_as_string := date_time.AsLocalSystemTimeString;
+utc_time_as_file_time := date_time.AsUtcFileTime;
+
+// Generate new timestamp for filename
+IF RollingIntervalReached(local_time_as_system_time, rolling_interval) OR date_time.Done THEN
+	time_stamp := date_time.ToFormatString(timestamp_format);
+END_IF
+
+// Delete expired log files
+new_day(Clk := local_time_as_system_time.wHour = 0);
+delete_expired_log_files(
+	StartScan 			:= 	new_day.Q AND (log_lifespan > 0),
+	ExpirationInDays 	:=	log_lifespan,
+	FilePath			:=	file_path,
+	FileName 			:=	file_name,
+	CurrentUtcTime 		:= 	utc_time_as_file_time	
+);
+IF delete_expired_log_files.Error.Active THEN
+	internal_error_occured := TRUE;
+	_error := delete_expired_log_files.Error;
+END_IF
+		
+// Persist logging messages to file
+log_cache.PersistToFile(
+	time_info_ready,
+	file_name_string_builder
+		.Reset()
+		.Append(file_path)
+		.AppendIf(Tc2_Standard.Right(file_path, 1) <> '\', '\')
+		.Append(time_stamp)
+		.Append(file_name)
+		.ToString()
+);
+IF log_cache.Error.Active THEN
+	internal_error_occured := TRUE;
+	_error := log_cache.Error;
+END_IF
+
+// Reset error flag each cycle to automatically confirm errors once they are gone.
+IF NOT internal_error_occured THEN
+	_error.Active := FALSE;
+	_error.Code := ErrorCodes.None;
+	_error.Info := '';
+END_IF
+internal_error_occured := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SendLogEvent" Id="{9b0ec506-83b0-4354-a8f0-2afcd94dd817}">
+      <Declaration><![CDATA[METHOD PUBLIC SendLogEvent : BOOL
+VAR_INPUT
+	event : LogEvent;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[log_cache.AddLine(formatter.Format(event));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetRollingInterval" Id="{6b6a98f5-4ff4-49b0-80a7-0a8439a6af3a}" FolderPath="Configuration\">
+      <Declaration><![CDATA[/// Configuration method.
+/// Sets the rolling interval of the log file. Once the rolling interval
+/// expires, a file name with a new timestamp will be generated.
+METHOD PUBLIC SetRollingInterval : REFERENCE TO FileLogTargetAdapter
+VAR_INPUT
+	/// Rolling interval for log file. Once exceeded, a new log file will be created.
+	interval : RollingInterval; 
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[rolling_interval := interval;
+
+SetRollingInterval REF= THIS^;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

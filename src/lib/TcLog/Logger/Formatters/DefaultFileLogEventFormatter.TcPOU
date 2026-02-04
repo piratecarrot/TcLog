@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="DefaultFileLogEventFormatter" Id="{aa68e43a-1202-4457-87ae-37bbd3c75af4}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'linkalways'}
+{attribute 'no_explicit_call' := 'This FB is a CLASS and must be accessed using methods or properties'}
+FUNCTION_BLOCK DefaultFileLogEventFormatter IMPLEMENTS LogEventFormatter
+VAR
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Format" Id="{79736781-e417-4725-b09d-6898db45937f}">
+      <Declaration><![CDATA[METHOD PUBLIC Format : T_MaxString
+VAR_INPUT
+	event : LogEvent;
+END_VAR
+VAR_INST
+	{attribute 'hide'}
+	message_builder : StringBuilder;
+END_VAR
+VAR CONSTANT
+	DELIMITER : STRING := '|';
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Format := message_builder
+	.Reset()
+	.Append(Tc2_Utilities.SystemTime_To_String(event.timestamp))
+	.Append(DELIMITER)
+	.Append(TO_STRING(event.level))
+	.Append(DELIMITER)
+	.Append(event.logger)
+	.Append(DELIMITER)
+	.Append(event.message)
+	.ToString();]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,533 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="TcLog" Id="{5c4b89f2-cf40-4a8f-8650-3302720788b2}" SpecialFunc="None">
+    <Declaration><![CDATA[/// `TcLog` is the client side of the logger.  
+///
+/// It is used to send the logs to `TcLogCore`. Typically, it is instantiated
+/// once in each `FUNCTION_BLOCK` or `PROGRAM` where logging is done. The same 
+/// instance can then be used for all logging within that POU. 
+///
+/// `TcLog` implements a string builder that facilitates the compilation of the log
+/// message without the need for external data type conversions or multiple chained `CONCAT` calls.
+/// See the method section for more information.
+///
+/// The last method to call after the log message has been built is one of ´[Debug|Information|Warning|Error|Fatal]`. 
+/// This sets the log level of the message and sends it off to the log message queue of `TcLogCore` where it will
+/// be processed according to its configuration.
+{attribute 'linkalways'}
+{attribute 'no_explicit_call' := 'This FB is a CLASS and must be accessed using methods or properties'}
+//{attribute 'hide_all_locals'}
+{attribute 'reflection'} 
+FUNCTION_BLOCK PUBLIC TcLog IMPLEMENTS ILog
+VAR
+	log_condition_satisfied : BOOL; // flag that indicates, whether log condition has been satisfied.
+								    // Logging will only be carried out it this evaluates to TRUE.                    
+	
+	log_data_initialised : BOOL; // flag that indicate, whether log data has been initialized.
+							     // Necessary for configuration methods to provide a fluent interface.                            
+	
+	log_data : Tc2_System.T_MaxString; // contains message to be logged.
+	used_logger : ILogCore;
+	
+	{attribute 'instance-path'} 
+	{attribute 'noinit'} 
+	instance_path : STRING; // contains instance path
+END_VAR
+VAR_STAT
+	{attribute 'hide'}
+	logger_singleton_instance : ILogCore; // Wires up TcLog ("Client") to TcLogCore ("Server") (Singleton-Behaviour)
+END_VAR
+VAR CONSTANT
+	INVALID_LOGGER_REFERENCE : UDINT := 0;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="Appenders" Id="{5d0cbe44-e627-49b8-b6aa-95471c05e5c3}">
+      <Folder Name="Dates" Id="{f56cd2df-d70f-4c3f-9021-666e6c51d8a2}" />
+      <Folder Name="Numbers" Id="{c453e814-4d5d-4fff-b380-ddda64b5ed1b}" />
+    </Folder>
+    <Method Name="AppendAny" Id="{4bffd3ce-02cf-4edd-be0d-41e996112f62}" FolderPath="Appenders\">
+      <Declaration><![CDATA[/// Appends any given data to the log string. The type of the provided data
+/// has to be one of the [standard data types](https://infosys.beckhoff.com/english.php?content=../content/1033/tc3_plc_intro/2529388939.html&id=).
+/// This method can be chained.
+METHOD AppendAny : REFERENCE TO TcLog
+VAR_INPUT
+	/// data to be appended to log string.
+	data : ANY;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[InitializeLogData();
+
+log_data := Tc2_Standard.CONCAT(log_data, AnyToString(data));
+
+AppendAny REF= THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendByte" Id="{ad1eb448-6e6a-4730-a2c8-fb0825cbdaa2}" FolderPath="Appenders\Numbers\">
+      <Declaration><![CDATA[/// Appends a BYTE to the log string.
+/// This method can be chained.
+METHOD PUBLIC AppendByte : REFERENCE TO TcLog
+VAR_INPUT
+	/// data to be appended to log string.
+	data : BYTE;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AppendByte REF= AppendString(TO_STRING(data));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendDate" Id="{544f15f3-c4a6-42ac-8a02-7b14a1de521a}" FolderPath="Appenders\Dates\">
+      <Declaration><![CDATA[/// Appends a DATE to the log string.
+/// This method can be chained.
+METHOD PUBLIC AppendDate : REFERENCE TO TcLog
+VAR_INPUT
+  /// data to be appended to log string.
+  data : DATE;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AppendDate REF= AppendString(TO_STRING(data));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendDateAndTime" Id="{9bc0db1a-e5a4-4a5a-bf24-15b309132dfe}" FolderPath="Appenders\Dates\">
+      <Declaration><![CDATA[/// Appends a DATE_AND_TIME to the log string.
+/// This method can be chained.
+METHOD PUBLIC AppendDateAndTime : REFERENCE TO TcLog
+VAR_INPUT
+  /// data to be appended to log string.
+  data : DATE_AND_TIME;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AppendDateAndTime REF= AppendString(TO_STRING(data));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendDint" Id="{c8c0aa2a-2f2d-437e-85f9-1c751b9dfdcc}" FolderPath="Appenders\Numbers\">
+      <Declaration><![CDATA[/// Appends a DINT to the log string.
+/// This method can be chained.
+METHOD PUBLIC AppendDint : REFERENCE TO TcLog
+VAR_INPUT
+	/// data to be appended to log string.
+	data : DINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AppendDint REF= AppendString(TO_STRING(data));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendDword" Id="{3a2d01e3-7af2-4018-92b3-7352a57f53fe}" FolderPath="Appenders\Numbers\">
+      <Declaration><![CDATA[/// Appends a DWORD to the log string.
+/// This method can be chained.
+METHOD PUBLIC AppendDword : REFERENCE TO TcLog
+VAR_INPUT
+  /// data to be appended to log string.
+  data : DWORD;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AppendDword REF= AppendString(TO_STRING(data));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendInt" Id="{45fe9b78-af4b-4434-8e06-e1dafb6e13e3}" FolderPath="Appenders\Numbers\">
+      <Declaration><![CDATA[/// Appends an INT to the log string.
+/// This method can be chained.
+METHOD PUBLIC AppendInt : REFERENCE TO TcLog
+VAR_INPUT
+  /// data to be appended to log string.
+  data : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AppendInt REF= AppendString(TO_STRING(data));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendLDate" Id="{a4dcc3c6-c14a-4525-b2f4-ba4821e56756}" FolderPath="Appenders\Dates\">
+      <Declaration><![CDATA[/// Appends a LDATE to the log string.
+/// This method can be chained.
+METHOD PUBLIC AppendLDate : REFERENCE TO TcLog
+VAR_INPUT
+  /// data to be appended to log string.
+  data : LDATE;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AppendLDate REF= AppendString(TO_STRING(data));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendLDateAndTime" Id="{43bd7907-cf49-41ef-a82a-e479923a8883}" FolderPath="Appenders\Dates\">
+      <Declaration><![CDATA[/// Appends a LDATE_AND_TIME to the log string.
+/// This method can be chained.
+METHOD PUBLIC AppendLDateAndTime : REFERENCE TO TcLog
+VAR_INPUT
+  /// data to be appended to log string.
+  data : LDATE_AND_TIME;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AppendLDateAndTime REF= AppendString(TO_STRING(data));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendLint" Id="{ebc40484-fcbc-4d35-986d-404e74ae1f0b}" FolderPath="Appenders\Numbers\">
+      <Declaration><![CDATA[/// Appends an LINT to the log string.
+/// This method can be chained.
+METHOD PUBLIC AppendLint : REFERENCE TO TcLog
+VAR_INPUT
+  /// data to be appended to log string.
+  data : LINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AppendLint REF= AppendString(TO_STRING(data));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendLreal" Id="{33aa4cc8-27bf-46e5-a01f-bd233203db48}" FolderPath="Appenders\Numbers\">
+      <Declaration><![CDATA[/// Appends an LREAL to the log string.
+/// This method can be chained.
+METHOD PUBLIC AppendLreal : REFERENCE TO TcLog
+VAR_INPUT
+  /// data to be appended to log string.
+  data : LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AppendLreal REF= AppendString(TO_STRING(data));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendLTimeOfDay" Id="{5ae3e249-68ff-46aa-86df-4b0a17132706}" FolderPath="Appenders\Dates\">
+      <Declaration><![CDATA[/// Appends a LTIME_OF_DAY to the log string.
+/// This method can be chained.
+METHOD PUBLIC AppendLTimeOfDay : REFERENCE TO TcLog
+VAR_INPUT
+  /// data to be appended to log string.
+  data : LTIME_OF_DAY;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AppendLTimeOfDay REF= AppendString(TO_STRING(data));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendLword" Id="{54a0a895-4a8e-46f0-a0bf-41949b51ccad}" FolderPath="Appenders\Numbers\">
+      <Declaration><![CDATA[/// Appends an LWORD to the log string.
+/// This method can be chained.
+METHOD PUBLIC AppendLword : REFERENCE TO TcLog
+VAR_INPUT
+  /// data to be appended to log string.
+  data : LWORD;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AppendLword REF= AppendString(TO_STRING(data));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendReal" Id="{23b2cea7-235e-40c4-867c-eade20729d38}" FolderPath="Appenders\Numbers\">
+      <Declaration><![CDATA[/// Appends a REAL to the log string.
+/// This method can be chained.
+METHOD PUBLIC AppendReal : REFERENCE TO TcLog
+VAR_INPUT
+  /// data to be appended to log string.
+  data : REAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AppendReal REF= AppendString(TO_STRING(data));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendSint" Id="{30a970e4-4a41-4287-b98c-3ae90b8a0db9}" FolderPath="Appenders\Numbers\">
+      <Declaration><![CDATA[/// Appends a SINT to the log string.
+/// This method can be chained.
+METHOD PUBLIC AppendSint : REFERENCE TO TcLog
+VAR_INPUT
+  /// data to be appended to log string.
+  data : SINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AppendSint REF= AppendString(TO_STRING(data));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendString" Id="{f314f515-c228-4308-91c0-6f8cc9762107}" FolderPath="Appenders\">
+      <Declaration><![CDATA[/// Appends another string to the log message.
+/// This method can be chained.
+METHOD AppendString : REFERENCE TO TcLog
+VAR_INPUT
+	/// data to be appended to log string.
+	data : Tc2_System.T_MaxString; 
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[InitializeLogData();
+
+log_data := Tc2_Standard.CONCAT(log_data, data);
+  
+AppendString REF= THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendTimeOfDay" Id="{a1f33d08-d316-49bd-bea5-ad15a4a8a53a}" FolderPath="Appenders\Dates\">
+      <Declaration><![CDATA[/// Appends a TIME_OF_DAY to the log string.
+/// This method can be chained.
+METHOD PUBLIC AppendTimeOfDay : REFERENCE TO TcLog
+VAR_INPUT
+  /// data to be appended to log string.
+  data : TIME_OF_DAY;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AppendTimeOfDay REF= AppendString(TO_STRING(data));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendUdint" Id="{a7d2e646-bf53-4c9e-a57a-0b4dd997f65f}" FolderPath="Appenders\Numbers\">
+      <Declaration><![CDATA[/// Appends a UDINT to the log string.
+/// This method can be chained.
+METHOD PUBLIC AppendUdint : REFERENCE TO TcLog
+VAR_INPUT
+  /// data to be appended to log string.
+  data : UDINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AppendUdint REF= AppendString(TO_STRING(data));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendUint" Id="{a6778ae4-15e5-4b9f-bdd2-1f5c5d704eb6}" FolderPath="Appenders\Numbers\">
+      <Declaration><![CDATA[/// Appends a UINT to the log string.
+/// This method can be chained.
+METHOD PUBLIC AppendUint : REFERENCE TO TcLog
+VAR_INPUT
+  /// data to be appended to log string.
+  data : UINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AppendUint REF= AppendString(TO_STRING(data));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendUlint" Id="{e98ccfdf-7729-4dcf-8208-89d80763cb29}" FolderPath="Appenders\Numbers\">
+      <Declaration><![CDATA[/// Appends a ULINT to the log string.
+/// This method can be chained.
+METHOD PUBLIC AppendUlint : REFERENCE TO TcLog
+VAR_INPUT
+  /// data to be appended to log string.
+  data : ULINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AppendUlint REF= AppendString(TO_STRING(data));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendUsint" Id="{9f54b4e7-fa0d-44a5-bf9b-a83238cd6678}" FolderPath="Appenders\Numbers\">
+      <Declaration><![CDATA[/// Appends a USINT to the log string.
+/// This method can be chained.
+METHOD PUBLIC AppendUsint : REFERENCE TO TcLog
+VAR_INPUT
+  /// data to be appended to log string.
+  data : USINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AppendUsint REF= AppendString(TO_STRING(data));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendVariable" Id="{b8ff72f6-d35f-442e-b6f4-79fffa75bb01}" FolderPath="Appenders\">
+      <Declaration><![CDATA[/// Appends information about the given variable to the log string. 
+/// This method can be chained.
+/// Example: 
+
+/// ```st
+/// VAR
+///   Logger: TcLog;
+///    myInt : INT := 10;
+///   myVarInfo : __SYSTEM.VAR_INFO := __VARINFO(myInt);
+/// END_VAR
+/// Logger.AppendVariable(myVarInfo, myInt);
+/// ```
+///
+METHOD AppendVariable : REFERENCE TO TcLog
+VAR_INPUT
+	/// [VAR_INFO](https://infosys.beckhoff.com/index.php?content=../content/1031/tc3_plc_intro/3527777675.html&id=) of variable to be appended to log string.
+	varInfo : __SYSTEM.VAR_INFO;
+	/// Value of variable to be appended to log string.
+	value : ANY; 
+END_VAR
+VAR
+	format : Tc2_Utilities.FB_FormatString;
+	symbolName : Tc2_System.T_MaxString;
+	typeName : Tc2_System.T_MaxString;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[InitializeLogData();
+
+symbolName := varInfo.Symbol;
+typeName := varInfo.TypeName; 
+
+format(
+  sFormat := '%s [%s] : ',
+  arg1 := Tc2_Utilities.F_String(symbolName),
+  arg2 := Tc2_Utilities.F_String(typeName));
+  
+AppendString(format.sOut);
+AppendAny(value);
+
+AppendVariable REF= THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AppendWord" Id="{e024ad2d-63ee-4a24-a242-95e732b81767}" FolderPath="Appenders\Numbers\">
+      <Declaration><![CDATA[/// Appends a WORD to the log string.
+/// This method can be chained.
+METHOD PUBLIC AppendWord : REFERENCE TO TcLog
+VAR_INPUT
+  /// data to be appended to log string.
+  data : WORD;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AppendWord REF= AppendString(TO_STRING(data));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Debug" Id="{491bfe9a-b3b6-4d17-bed9-5ffc6291beda}">
+      <Declaration><![CDATA[/// Logs the log string in DEBUG level.
+METHOD PUBLIC Debug : BOOL
+VAR_INPUT
+	/// Message to be appended to log string.
+	message : Tc2_System.T_MaxString; 
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[LogWithLevel(message, LogLevel.Debug);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Error" Id="{7158f6bd-dc78-4c6b-aa32-bcf6d3bdf428}">
+      <Declaration><![CDATA[/// Logs the log string in ERROR level.
+METHOD PUBLIC Error
+VAR_INPUT
+	/// Message to be appended to log string.
+	message : Tc2_System.T_MaxString; 
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[LogWithLevel(message, LogLevel.Error);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Fatal" Id="{a7de9604-b7fc-4ee2-9fbf-6d062ea98ecd}">
+      <Declaration><![CDATA[/// Logs the log string in FATAL level.
+METHOD PUBLIC Fatal : BOOL
+VAR_INPUT
+	/// Message to be appended to log string.
+	message : Tc2_System.T_MaxString; 
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[LogWithLevel(message, LogLevel.Fatal);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Information" Id="{537b451e-6a21-41c7-8ca9-290caed29455}">
+      <Declaration><![CDATA[/// Logs the log string in INFORMATION level.
+METHOD PUBLIC Information : BOOL
+VAR_INPUT
+	/// Message to be appended to log string.
+	message : Tc2_System.T_MaxString; 
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[LogWithLevel(message, LogLevel.Information);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{8b09b2c0-1450-4aff-be1e-21cc676bd507}">
+      <Declaration><![CDATA[/// Initializes the reference to the core logger. Should only be called once from the core logger directly.
+METHOD PUBLIC Init : BOOL
+VAR_INPUT
+	/// Reference to TcLoggerCore instance.
+	log_core : ILogCore; 
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF logger_singleton_instance = 0 THEN
+	logger_singleton_instance := log_core;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="InitializeLogData" Id="{b983f825-58c9-40b0-8c51-6bb89d76fdd5}">
+      <Declaration><![CDATA[// Necessary to provide a fluent interface of the function. 
+// Has to be called at the begin of any method that returns a reference to THIS^
+METHOD PRIVATE InitializeLogData : BOOL]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT log_data_initialised THEN
+	log_condition_satisfied := TRUE;
+	log_data := '';
+	log_data_initialised := TRUE;
+	
+	IF used_logger = 0 THEN
+		used_logger := logger_singleton_instance;
+	END_IF
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="LogWithLevel" Id="{5753a259-43d7-4f8b-abd1-f29971f98692}">
+      <Declaration><![CDATA[METHOD PUBLIC LogWithLevel
+VAR_INPUT
+	message : Tc2_System.T_MaxString;
+	level : LogLevel;
+END_VAR
+VAR
+	shortened_instance_path : T_MaxString;
+	modified_message : T_MaxString;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[InitializeLogData();
+
+IF log_condition_satisfied THEN
+	IF used_logger <> INVALID_LOGGER_REFERENCE THEN
+		modified_message := Tc2_Standard.Concat(log_data, message);
+ 		shortened_instance_path := ShortenInstancePath(instance_path);
+		used_logger.LogStandardFormat(
+			shortened_instance_path,
+			level,
+			modified_message
+		);
+	ELSE
+		Tc2_System.AdsLogStr(
+			AdsLog_MsgType_Log OR LogLevelToAdsLogMsgType(LogLevel.Error),
+			'used_logger: No valid reference',
+			''
+		); 
+	END_IF
+END_IF
+
+log_data_initialised := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="OnCondition" Id="{83462a1c-4606-4b15-a01b-2e956d2db9aa}">
+      <Declaration><![CDATA[/// Conditional execution of the log command. Only executes logging when Cond = TRUE.
+METHOD PUBLIC OnCondition : REFERENCE TO TcLog
+VAR_INPUT
+  /// Logs data only if this condition evaluates to TRUE.
+  cond : BOOL; 
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[InitializeLogData();
+
+log_condition_satisfied := cond;
+
+OnCondition REF= THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetLogger" Id="{a1c549d5-7aa7-4f67-878c-b6a85d92857d}">
+      <Declaration><![CDATA[/// Initializes the reference to the core logger. This enables you to use several
+/// loggers with different configurations in one project.
+METHOD PUBLIC SetLogger : BOOL
+VAR_INPUT
+  /// Reference to Core Logger
+  ref2Core : ILogCore; 
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[used_logger := ref2Core;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ToAdsLog" Id="{ffe9339a-7539-48aa-9405-4a301c71aa37}">
+      <Declaration><![CDATA[/// Logs directly to ADS log, ignoring the settings of the base logger.
+METHOD PUBLIC ToAdsLog : BOOL
+VAR_INPUT
+  /// Log level in which message should be logged to ADS.
+  level : LogLevel; 
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[InitializeLogData();
+
+IF log_condition_satisfied THEN
+	Tc2_System.AdsLogStr(
+		AdsLog_MsgType_Log OR LogLevelToAdsLogMsgType(level),
+		log_data,
+		''
+	); 
+END_IF
+
+log_data_initialised := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Warning" Id="{0a623155-faf5-464b-bc5a-157976abd303}">
+      <Declaration><![CDATA[/// Logs the log string in WARNING level.
+METHOD PUBLIC Warning
+VAR_INPUT
+	/// Message to be appended to log string.
+	message : Tc2_System.T_MaxString; 
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[LogWithLevel(message, LogLevel.Warning);]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="LogEvent" Id="{d23894b2-6075-4807-9e06-8026e94bffa3}">
+    <Declaration><![CDATA[TYPE LogEvent :
+STRUCT
+	timestamp : Tc2_Utilities.TimeStruct;
+	level : LogLevel;
+	logger : T_MaxString;
+	message : T_MaxString;
+END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

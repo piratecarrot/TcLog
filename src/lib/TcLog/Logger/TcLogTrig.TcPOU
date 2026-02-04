@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="TcLogTrig" Id="{9fe29636-d167-4863-bf9e-e0ac4bd5c094}" SpecialFunc="None">
+    <Declaration><![CDATA[/// This function block can be used to log on rising or falling edges.
+/// For each signal that should be watched, a separate instance of `TcLogTrig` 
+/// must be created.
+{attribute 'linkalways'}
+{attribute 'no_explicit_call' := 'This FB is a CLASS and must be accessed using methods or properties'}
+FUNCTION_BLOCK PUBLIC TcLogTrig EXTENDS TcLog]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="OnFallingEdge" Id="{438c69dd-36c1-47db-9ca4-1dd2e3805bdf}">
+      <Declaration><![CDATA[/// Logs data on falling edge of `CLK`.
+{attribute 'hide_all_locals'}
+METHOD PUBLIC OnFallingEdge : REFERENCE TO TcLog
+VAR_INPUT
+  /// Falling edge triggers logging the data.
+  CLK : BOOL; 
+END_VAR
+VAR_INST
+    fTrig : Tc2_Standard.F_TRIG;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fTrig(CLK:=CLK);
+
+SUPER^.OnCondition(fTrig.Q);
+
+OnFallingEdge REF= THIS^;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="OnRisingEdge" Id="{6a00ac8c-8211-4843-82e2-2a60643eae38}">
+      <Declaration><![CDATA[/// Logs data on rising edge of `CLK`.
+{attribute 'hide_all_locals'}
+METHOD PUBLIC OnRisingEdge : REFERENCE TO TcLog
+VAR_INPUT
+  /// Rising edge logs data.
+  CLK : BOOL; 
+END_VAR
+VAR_INST
+    rTrig : Tc2_Standard.R_TRIG;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[rTrig(CLK:=CLK);
+
+SUPER^.OnCondition(rTrig.Q);
+
+OnRisingEdge REF= THIS^;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

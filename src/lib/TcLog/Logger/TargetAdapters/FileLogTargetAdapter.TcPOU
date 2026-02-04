@@ -27,13 +27,14 @@ VAR
 
 	_error : Error; // Contains information about internal error.
 	_busy : BOOL; // Logger is busy, typically with writing logs to the file system.
+	
+	rolling_interval_detector : RollingIntervalDetector;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
     <Folder Name="Configuration" Id="{28a48266-87e4-495d-a151-e76531510359}" />
     <Folder Name="Constructor" Id="{8be6375e-8e45-4885-bc59-a248a8bf47dc}" />
-    <Folder Name="Tasks" Id="{2d4fb0a7-84f4-479d-99d6-59c3ad37f26e}" />
     <Method Name="DeleteLogFilesAfterDays" Id="{32410822-67bd-4c13-a83d-53eb1112e24c}" FolderPath="Configuration\">
       <Declaration><![CDATA[/// Configuration method which sets the lifespan of log files. Once exceeded, they will be deleted.
 METHOD PUBLIC DeleteLogFilesAfterDays : REFERENCE TO FileLogTargetAdapter
@@ -89,54 +90,14 @@ END_VAR]]></Declaration>
 FilePath REF= THIS^;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="FlushCache" Id="{37c75623-56f0-45e8-8045-828b74c5a501}" FolderPath="Tasks\">
+    <Method Name="FlushCache" Id="{37c75623-56f0-45e8-8045-828b74c5a501}">
       <Declaration><![CDATA[/// Flushes the logging cache. All messages that have not yet been processed will be lost.
 METHOD PUBLIC FlushCache : BOOL]]></Declaration>
       <Implementation>
         <ST><![CDATA[log_cache.FlushCache();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="RollingIntervalReached" Id="{c9546229-e455-4192-9520-f00430cb9e9e}" FolderPath="Tasks\">
-      <Declaration><![CDATA[// Checks the specified rolling interval for the file name.
-// Generates new file name if rolling intervall exceeded.
-{attribute 'hide_all_locals'}
-{attribute 'hide'}
-METHOD PRIVATE RollingIntervalReached : BOOL
-VAR_INPUT
-	current_utc_time : Tc2_Utilities.TimeStruct; // Current system time as utc
-	rolling_interval : RollingInterval; // Rolling interval 
-END_VAR
-VAR_INST
-	new_hour : Tc2_Standard.R_Trig;
-	new_day : Tc2_Standard.R_Trig;
-	new_month : Tc2_Standard.R_Trig;
-	
-	hour_rolled : BOOL;
-	day_rolled : BOOL;
-	month_rolled : BOOL;
-END_VAR]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[new_hour(
-	Clk := (current_utc_time.wMinute = 0 AND current_utc_time.wSecond = 0), 
-	Q => hour_rolled
-);
-
-new_day(
-	Clk := (hour_rolled AND current_utc_time.wHour = 0), 
-	Q => day_rolled
-);
-
-new_month(
-	Clk := (day_rolled AND current_utc_time.wDay = 1),
-	Q => month_rolled
-);
-
-RollingIntervalReached :=	(hour_rolled 	AND rolling_interval = RollingInterval.Hourly)	OR
-							(day_rolled 	AND rolling_interval = RollingInterval.Daily)	OR
-							(month_rolled 	AND rolling_interval = RollingInterval.Monthly);]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="Run" Id="{ec75d489-513f-4f09-8e6c-6d2e82b7e0d2}" FolderPath="Tasks\">
+    <Method Name="Run" Id="{ec75d489-513f-4f09-8e6c-6d2e82b7e0d2}">
       <Declaration><![CDATA[METHOD PUBLIC Run
 VAR_INST
 	new_day : Tc2_Standard.R_Trig; 
@@ -157,8 +118,10 @@ local_time_as_system_time := date_time.AsLocalSystemTime;
 local_time_as_string := date_time.AsLocalSystemTimeString;
 utc_time_as_file_time := date_time.AsUtcFileTime;
 
+rolling_interval_detector.Run(local_time_as_system_time);
+
 // Generate new timestamp for filename
-IF RollingIntervalReached(local_time_as_system_time, rolling_interval) OR date_time.Done THEN
+IF rolling_interval_detector.IntervalRolled(rolling_interval) OR date_time.Done THEN
 	time_stamp := date_time.ToFormatString(timestamp_format);
 END_IF
 

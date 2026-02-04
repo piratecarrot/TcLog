@@ -10,7 +10,9 @@ TYPE RollingInterval :
 	None := 0,
 	Hourly,
 	Daily,
-	Monthly
+	Weekly,
+	Monthly,
+	Yearly
 );
 END_TYPE]]></Declaration>
   </DUT>

@@ -76,6 +76,9 @@
     <Compile Include="Logger\Formatters\DefaultFileLogEventFormatter.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Logger\Functions\RollingIntervalDetector.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Logger\Functions\ShortenInstancePath.TcPOU">
       <SubType>Code</SubType>
     </Compile>

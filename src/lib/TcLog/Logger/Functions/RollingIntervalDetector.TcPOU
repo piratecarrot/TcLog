@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="RollingIntervalDetector" Id="{f62c7755-54f6-4229-bd8a-fefbfcc6e6a1}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'linkalways'}
+{attribute 'no_explicit_call' := 'This FB is a CLASS and must be accessed using methods or properties'}
+FUNCTION_BLOCK PUBLIC RollingIntervalDetector
+VAR
+	new_hour : Tc2_Standard.R_Trig;
+	new_day : Tc2_Standard.R_Trig;
+	new_week : Tc2_Standard.R_Trig;
+	new_month : Tc2_Standard.R_Trig;
+	new_year : Tc2_Standard.R_Trig;
+	
+	hour_rolled : BOOL;
+	day_rolled : BOOL;
+	week_rolled : BOOL;
+	month_rolled : BOOL;
+	year_rolled : BOOL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="DayRolled" Id="{26ce4b39-cb53-4911-9b0b-a8572c1aaf32}">
+      <Declaration><![CDATA[PROPERTY PUBLIC DayRolled : BOOL]]></Declaration>
+      <Get Name="Get" Id="{f5d5aef3-8a64-4812-b3a4-7274a04a647d}">
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="HourRolled" Id="{2c088ac4-d502-45ad-879a-8ff298ad97b3}">
+      <Declaration><![CDATA[PROPERTY PUBLIC HourRolled : BOOL]]></Declaration>
+      <Get Name="Get" Id="{bbe060de-e1d8-41b1-a5bc-2ea055c73014}">
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="IntervalRolled" Id="{ef27a17d-b280-43e8-9480-5f41ecd66820}">
+      <Declaration><![CDATA[METHOD PUBLIC IntervalRolled : BOOL
+VAR_INPUT
+	rolling_interval : RollingInterval;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE rolling_interval OF
+	RollingInterval.Hourly:
+		IntervalRolled := HourRolled;
+		
+	RollingInterval.Daily:
+		IntervalRolled := DayRolled;
+		
+	RollingInterval.Weekly:
+		IntervalRolled := WeekRolled;
+		
+	RollingInterval.Monthly:
+		IntervalRolled := MonthRolled;
+		
+	RollingInterval.Yearly:
+		IntervalRolled := YearRolled;
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="MonthRolled" Id="{58db7060-1105-4910-9e85-9386e9afce26}">
+      <Declaration><![CDATA[PROPERTY PUBLIC MonthRolled : BOOL]]></Declaration>
+      <Get Name="Get" Id="{e18d11d7-3dc6-48ac-8478-4b01876a5c09}">
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Run" Id="{0d5add37-5f95-48e3-a41b-72c04e574c3a}">
+      <Declaration><![CDATA[METHOD PUBLIC Run
+VAR_INPUT
+	current_utc_time : Tc2_Utilities.TimeStruct;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[new_hour(
+	Clk := (current_utc_time.wMinute = 0 AND current_utc_time.wSecond = 0), 
+	Q => hour_rolled
+);
+
+new_day(
+	Clk := (hour_rolled AND current_utc_time.wHour = 0), 
+	Q => day_rolled
+);
+
+new_week(
+	Clk := (day_rolled AND current_utc_time.wDayOfWeek = 0),
+	Q => week_rolled
+);
+
+new_month(
+	Clk := (day_rolled AND current_utc_time.wDay = 1),
+	Q => month_rolled
+);
+
+new_year(
+	Clk := (day_rolled AND current_utc_time.wMonth = 1 AND current_utc_time.wDay = 1),
+	Q => year_rolled
+);]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="WeekRolled" Id="{076dc528-37db-4e7e-9d23-9ace53b0e4b0}">
+      <Declaration><![CDATA[PROPERTY PUBLIC WeekRolled : BOOL]]></Declaration>
+      <Get Name="Get" Id="{98def838-03ce-4e76-9ff9-09cec0fae993}">
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="YearRolled" Id="{6b23a960-aaa2-4c67-95ed-0fb9944e21b9}">
+      <Declaration><![CDATA[PROPERTY PUBLIC YearRolled : BOOL]]></Declaration>
+      <Get Name="Get" Id="{563888f3-a862-4282-a3f7-a09dbc19954c}">
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+  </POU>
+</TcPlcObject>

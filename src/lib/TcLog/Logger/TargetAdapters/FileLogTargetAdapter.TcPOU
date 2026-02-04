@@ -73,9 +73,20 @@ METHOD PUBLIC FileName : REFERENCE TO FileLogTargetAdapter
 VAR_INPUT
 	/// File name where the logs should be written to. Should not include path.
 	file_name : STRING;
+END_VAR
+VAR
+	last_period_index : INT;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[THIS^.file_name := file_name;
+
+last_period_index := FindLastOccurrence(file_name, '.');
+
+IF last_period_index <> 0 THEN
+	file_name_extension := GetFileExtension(file_name);
+ELSE
+	file_name_extension := 'log';
+END_IF
 
 FileName REF= THIS^;]]></ST>
       </Implementation>

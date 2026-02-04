@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="DeviceIdentification" Id="{41fc405e-dc1d-4522-98e4-8d210b8f7d50}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK DeviceIdentification
+VAR
+	fb : FB_GetDeviceIdentificationEx;
+	initialised : BOOL;
+	
+	is_windows : BOOL;
+	is_windows_ce : BOOL;
+	is_bsd : BOOL;
+	is_linux : BOOL;
+	
+	path_delimiter : STRING(1);
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Initialise" Id="{cd70b8ec-64d4-4b8d-b42f-1333153b7073}">
+      <Declaration><![CDATA[METHOD PUBLIC Initialise : BOOL
+VAR
+	dev_id : Tc2_Utilities.ST_DeviceIdentificationEx;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF initialised THEN
+	Initialise := initialised;
+	RETURN;
+END_IF
+
+fb(bExecute := TRUE);
+
+IF NOT fb.bBusy THEN
+	dev_id := fb.stDevIdent;
+	initialised := TRUE;
+	fb(bExecute := FALSE);
+END_IF
+
+IF Left(dev_id.strImageOsName, 10) = 'Windows CE' THEN
+	is_windows_ce := TRUE;
+ELSIF Left(dev_id.strImageOsName, 7) = 'Windows' THEN
+	is_windows := TRUE; 
+END_IF
+
+IF is_windows OR is_windows_ce THEN
+	path_delimiter := '\';
+ELSE
+	path_delimiter := '/';
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="IsBsd" Id="{09f6f01d-7068-4c14-a3e9-1e8c3477e6fb}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC IsBsd : BOOL]]></Declaration>
+      <Get Name="Get" Id="{7b10fac7-b026-4d23-9c77-11934fe53f48}">
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IsBsd := is_bsd;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="IsLinux" Id="{225311cc-30d5-431c-b75d-2b9479e339ea}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC IsLinux : BOOL]]></Declaration>
+      <Get Name="Get" Id="{67bbca29-c393-4c21-9195-8a0eb4c78ba2}">
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IsLinux := is_linux;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="IsWindows" Id="{f5f78fb3-64e0-4d0e-a69f-ed0311e82b82}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC IsWindows : BOOL]]></Declaration>
+      <Get Name="Get" Id="{f7959264-2227-4e17-b992-7bddf0a7de28}">
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IsWindows := is_windows;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="IsWindowsCE" Id="{447f6a2a-6d07-4b1d-b45f-926eb9f4c9bd}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC IsWindowsCE : BOOL]]></Declaration>
+      <Get Name="Get" Id="{c56364d1-6325-4283-bcf3-adbfca7e0cba}">
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IsWindowsCE := is_windows_ce;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PathDelimiter" Id="{9908fc20-c991-4bd4-8ef7-825bd3e51254}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC PathDelimiter : STRING(1)]]></Declaration>
+      <Get Name="Get" Id="{9108cfab-a7b2-4ee6-9f74-96c0172d3875}">
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[PathDelimiter := path_delimiter;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+  </POU>
+</TcPlcObject>

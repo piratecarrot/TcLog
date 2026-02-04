@@ -49,6 +49,15 @@
     <Compile Include="Logger\Buffer\LogEventBuffer.TcIO">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Logger\Functions\DeviceIdentification.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Logger\Functions\FindLastOccurrence.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Logger\Functions\GetFileExtension.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Logger\Functions\LogLevelToAdsLogMsgType.TcPOU">
       <SubType>Code</SubType>
     </Compile>

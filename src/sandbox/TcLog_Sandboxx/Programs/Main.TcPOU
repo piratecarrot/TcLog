@@ -9,14 +9,38 @@ VAR
 	file_adapter : FileLogTargetAdapter;
 	
 	trigger_log : BOOL;
+	
+	within_string : T_MaxString := 'this.is.a.test.log';
+	found_index : INT;
+	extension : T_MaxString;
+	
+	dev_id : DeviceIdentification;
 END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[core_logger
+      <ST><![CDATA[found_index := FindLastOccurrence(within_string, '.');
+extension := GetFileExtension(within_string);
+
+dev_id.Initialise();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+core_logger
 	.IncludeInstancePath()
 	.MinimumLevel(LogLevel.Debug)
 	.AddAdapter1(ads_adapter)
 	.AddAdapter2(file_adapter
-		.FilePath('C:\Users\malleblas\workspaces\TcLog\logs')
+		.FilePath('C:\Users\User\workspaces\TcLog\logs')
 		.FileName('tclog_sandbox.log')
 		.SetRollingInterval(RollingInterval.Hourly)
 		.DeleteLogFilesAfterDays(1))
@@ -25,7 +49,9 @@ END_VAR]]></Declaration>
 IF trigger_log THEN
 	trigger_log := FALSE;
 	logger.Debug('Yo');
-END_IF]]></ST>
+END_IF
+
+]]></ST>
     </Implementation>
   </POU>
 </TcPlcObject>

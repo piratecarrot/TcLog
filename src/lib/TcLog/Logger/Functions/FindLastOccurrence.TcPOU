@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FindLastOccurrence" Id="{d7db0b7b-416d-43a1-a17e-97ed3b74fc66}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION FindLastOccurrence : INT
+VAR_INPUT
+	within_text : T_MaxString;
+	find_text : T_MaxString; 
+END_VAR
+VAR
+	complete : BOOL;
+	found_index : INT;
+	new_within_text : T_MaxString;
+	new_found_index : INT;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[new_within_text := within_text;
+
+REPEAT
+	new_found_index := Find(new_within_text, find_text);
+	
+	IF new_found_index <> 0 THEN
+		found_index := found_index + new_found_index;
+		new_within_text := Right(new_within_text, Len(new_within_text) - new_found_index);
+	ELSE
+		complete := TRUE;
+	END_IF
+UNTIL complete
+END_REPEAT;
+
+FindLastOccurrence := found_index;]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

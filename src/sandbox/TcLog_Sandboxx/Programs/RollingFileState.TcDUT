@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="RollingFileState" Id="{418d9e79-3798-4452-9e4d-1876133876a3}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+{attribute 'to_string'}
+TYPE RollingFileState :
+(
+	Closed,
+	Open,
+	Writing,
+	RollingOver
+);
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

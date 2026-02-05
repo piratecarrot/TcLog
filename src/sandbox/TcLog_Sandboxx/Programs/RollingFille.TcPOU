@@ -39,8 +39,7 @@ END_VAR]]></Declaration>
     <Method Name="OnOpenState" Id="{7934a996-6792-4dc6-9b85-64947639d6fb}">
       <Declaration><![CDATA[METHOD PRIVATE OnOpenState
 VAR_INPUT
-END_VAR
-]]></Declaration>
+END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[]]></ST>
       </Implementation>

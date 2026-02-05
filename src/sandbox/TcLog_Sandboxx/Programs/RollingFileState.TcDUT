@@ -7,8 +7,11 @@
 TYPE RollingFileState :
 (
 	Closed,
+	Opening,
 	Open,
+	Closing,
 	Writing,
+	Error,
 	RollingOver
 );
 END_TYPE]]></Declaration>

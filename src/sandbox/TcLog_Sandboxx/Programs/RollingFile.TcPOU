@@ -1,0 +1,169 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="RollingFile" Id="{fb0c942f-e725-4213-95a9-4aefd0bdfe94}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK RollingFile
+VAR
+	state : RollingFileState;
+	file_open : Tc2_System.FB_FileOpen;
+	file_close : Tc2_System.FB_FileClose;
+	file_write : Tc2_System.FB_FileWrite;
+	file_puts : Tc2_System.FB_FilePuts;
+	file_handle : UINT;
+
+	error_id : UDINT;
+
+	lockFileWriteToForceRisingEdge : BOOL; // filePuts can only be executed every other cycle
+									 // since it needs a rising edge to execute.
+	net_id : T_AmsNetId := '';
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="Properties" Id="{1d7d27bd-1712-408e-afe1-3db0b69942cf}" />
+    <Method Name="Close" Id="{f5bb7007-0ea1-476e-9497-f30e68c7048e}">
+      <Declaration><![CDATA[METHOD PUBLIC Close : BOOL
+VAR_INPUT
+	timeout : TIME := Tc2_System.Default_Ads_Timeout;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF state = RollingFileState.Open THEN
+	file_close.hFile := file_handle;
+	file_close.tTimeout := timeout;
+	file_close.bExecute := TRUE;
+	
+	state := RollingFileState.Closing;
+ELSIF state = RollingFileState.Closing THEN
+	IF NOT file_close.bBusy THEN
+		file_close.bExecute := FALSE;
+		Close := TRUE;
+
+		IF file_close.bError THEN
+			error_id := file_close.nErrId;
+			state := RollingFileState.Error;
+		ELSE
+			file_handle := 0;
+			state := RollingFileState.Closed;
+		END_IF
+	END_IF	
+END_IF
+
+file_close();]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="ErrorId" Id="{d9d2cffe-2bc7-4605-993d-25e8bdad6698}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC ErrorId : UDINT]]></Declaration>
+      <Get Name="Get" Id="{7b9399de-73d8-4abb-b9da-3cb88485df3e}">
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ErrorId := error_id;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="FileName" Id="{4e4550aa-8072-40b9-97bf-91369acb98a3}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC FileName : T_MaxString]]></Declaration>
+      <Get Name="Get" Id="{7e54ef0c-f178-46a4-9988-a86adc56121d}">
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[FileName := SEL(IsOpen, '', file_open.sPathName);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="IsClosed" Id="{475f4d6d-f6b8-4cac-9b30-844c2d7f8656}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC IsClosed : BOOL]]></Declaration>
+      <Get Name="Get" Id="{25e5d962-2214-4a21-922c-a892ffbbde5d}">
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IsClosed := state = RollingFileState.Closed;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="IsErrored" Id="{0af7a5fe-c0ee-4101-a695-6da7bb370d22}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC IsErrored : BOOL]]></Declaration>
+      <Get Name="Get" Id="{067cd703-7b16-48e1-a4f4-0566ec67b3c3}">
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IsErrored := state = RollingFileState.Error;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="IsOpen" Id="{0a125925-6eda-409f-bf72-b73719a2cea1}" FolderPath="Properties\">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY PUBLIC IsOpen : BOOL]]></Declaration>
+      <Get Name="Get" Id="{352c700f-c2e1-4ab7-b83c-7ae9bceef20e}">
+        <Declaration><![CDATA[PUBLIC]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IsOpen := state = RollingFileState.Open;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Open" Id="{1513242a-6101-442a-a550-ffa27a32becc}">
+      <Declaration><![CDATA[METHOD PUBLIC Open : BOOL
+VAR_INPUT
+	file_name : T_MaxString;
+	mode : FileOpenMode;
+	timeout : TIME := Tc2_System.Default_Ads_Timeout;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF state = RollingFileState.Closed THEN
+	file_open.sPathName := file_name;
+	file_open.nMode := mode; 
+	file_open.tTimeout := timeout;
+	file_open.bExecute := TRUE;
+	
+	state := RollingFileState.Opening;
+ELSIF state = RollingFileState.Opening THEN
+	IF NOT file_open.bBusy THEN
+		file_open.bExecute := FALSE;
+		Open := TRUE;
+
+		IF file_open.bError OR file_open.hFile = 0 THEN
+			error_id := file_open.nErrId;
+			state := RollingFileState.Error;
+		ELSE
+			file_handle := file_open.hFile;
+			state := RollingFileState.Open;
+		END_IF
+	END_IF
+END_IF
+
+file_open(
+	sNetId := net_id,
+	ePath := Tc2_System.E_OpenPath.Path_Generic
+);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="WriteString" Id="{7eeb13dc-152c-4ef5-a556-0a44cd79eec0}">
+      <Declaration><![CDATA[METHOD PUBLIC WriteString : BOOL
+VAR_INPUT
+	line : T_MaxString;
+	timeout : TIME := Tc2_System.Default_Ads_Timeout;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF state = RollingFileState.Open THEN
+	file_puts.sLine := line;
+	file_puts.tTimeout := timeout;
+	file_puts.bExecute := TRUE;
+	
+	IF NOT file_puts.bBusy THEN
+		file_puts.bExecute := FALSE;
+		WriteString := TRUE;
+		
+		IF file_puts.bError THEN
+			error_id := file_puts.nErrId;
+			state := RollingFileState.Error;
+		END_IF
+	END_IF
+END_IF
+
+file_puts(
+	sNetId := net_id,
+	hFile := file_handle
+);]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

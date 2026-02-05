@@ -3,6 +3,16 @@
   <POU Name="Main" Id="{cd559602-e31e-4d5b-ae62-cc768a3b78df}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM Main
 VAR
+	f : RollingFile;	
+
+	file_name : T_MaxString := 'C:\Logs\test.txt';
+	open_file : BOOL;
+	close_file : BOOL;
+	line_to_write : T_MaxString := 'Gday cobber$L';
+	write_line : BOOL;
+	
+	////////////////////////////////////////////////////////////////////////////////	
+
 	core_logger : TcLogCore(BufferSize := 50 * 50 * (Tc2_System.MAX_STRING_LENGTH + Constants.FifoOverhead));
 	logger : TcLog;
 	ads_adapter : AdsLogTargetAdapter;
@@ -10,30 +20,49 @@ VAR
 	
 	trigger_log : BOOL;
 	
+	////////////////////////////////////////////////////////////////////////////////
+	
 	within_string : T_MaxString := 'this.is.a.test.log';
 	found_index : INT;
 	extension : T_MaxString;
 	
 	dev_id : DeviceIdentification;
+	line : T_maxString;
 END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[found_index := FindLastOccurrence(within_string, '.');
+      <ST><![CDATA[IF open_file THEN
+	f.Open(file_name, FileOpenMode.Append OR FileOpenMode.Text);
+	
+	IF f.IsOpen THEN
+		open_file := FALSE;
+	ELSIF f.IsErrored THEN
+		open_file := FALSE;
+	END_IF
+END_IF
+
+IF close_file THEN
+	f.Close();
+	
+	IF f.IsClosed THEN
+		close_file := FALSE;
+	END_IF
+END_IF
+
+IF write_line THEN
+	f.WriteString(line_to_write);
+// 	IF  THEN
+// 		write_line := FALSE;
+// 	END_IF
+END_IF
+
+////////////////////////////////////////////////////////////////////////////////
+
+found_index := FindLastOccurrence(within_string, '.');
 extension := GetFileExtension(within_string);
 
 dev_id.Initialise();
 
-
-
-
-
-
-
-
-
-
-
-
-
+////////////////////////////////////////////////////////////////////////////////
 
 core_logger
 	.IncludeInstancePath()
